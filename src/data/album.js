@@ -190,6 +190,18 @@ export const CONFEDERATION_ORDER = ['CONCACAF', 'CONMEBOL', 'UEFA', 'AFC', 'CAF'
 export const getTeam = (code) => TEAMS.find((t) => t.code === code)
 
 export const getStickerInfo = (code) => {
+  if (!code) return {
+    code: '',
+    section: 'Unknown',
+    sectionCode: 'UNK',
+    title: '',
+    isSpecial: false,
+    isFoil: false,
+    isCocaCola: false,
+    teamCode: null,
+    position: null,
+    valueMultiplier: 1,
+  }
   const upper = code.toUpperCase().trim()
   return ALL_STICKERS_MAP[upper] || {
     code: upper,

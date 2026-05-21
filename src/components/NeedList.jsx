@@ -113,6 +113,14 @@ export default function NeedList({ needList, totalTradeValue, onAdd }) {
         </button>
       </div>
 
+      {/* Empty search result */}
+      {filtered.length === 0 && search && (
+        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <p className="text-3xl">🔍</p>
+          <p className="text-gray-400 text-sm">No stickers match &ldquo;{search}&rdquo;</p>
+        </div>
+      )}
+
       {/* Groups */}
       {Object.entries(grouped).map(([section, stickers]) => {
         const team = TEAMS.find((t) => t.name === section || t.code === section)

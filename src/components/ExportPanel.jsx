@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { exportNeedList, exportTradeList, exportFullCollection, exportJson, copyToClipboard } from '../utils/export'
 
-export default function ExportPanel({ needList, duplicates, entries, state, importCollection, clearCollection }) {
+export default function ExportPanel({ needList, duplicates, entries, state, importCollection, clearCollection, onToast }) {
   const [imported, setImported] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
 
@@ -12,6 +12,7 @@ export default function ExportPanel({ needList, duplicates, entries, state, impo
     reader.onload = (ev) => {
       importCollection(ev.target.result)
       setImported(true)
+      onToast?.('Collection imported', 'success')
       setTimeout(() => setImported(false), 2000)
     }
     reader.readAsText(file)
@@ -44,28 +45,28 @@ export default function ExportPanel({ needList, duplicates, entries, state, impo
             icon="📋"
             title="Export Need List"
             desc={`${stats.need} missing stickers → CSV`}
-            onClick={() => exportNeedList(needList)}
+            onClick={() => { exportNeedList(needList); onToast?.('Exported!', 'success') }}
             disabled={stats.need === 0}
           />
           <ExportButton
             icon="🔄"
             title="Export Trade List"
             desc={`${stats.trade} duplicate entries → CSV`}
-            onClick={() => exportTradeList(duplicates)}
+            onClick={() => { exportTradeList(duplicates); onToast?.('Exported!', 'success') }}
             disabled={stats.trade === 0}
           />
           <ExportButton
             icon="📦"
             title="Export Full Collection"
             desc={`${stats.have} entries → CSV`}
-            onClick={() => exportFullCollection(entries)}
+            onClick={() => { exportFullCollection(entries); onToast?.('Exported!', 'success') }}
             disabled={stats.have === 0}
           />
           <ExportButton
             icon="💾"
             title="Backup to JSON"
             desc="Full backup — use to restore later"
-            onClick={() => exportJson(state)}
+            onClick={() => { exportJson(state); onToast?.('Exported!', 'success') }}
             disabled={stats.have === 0}
           />
         </div>

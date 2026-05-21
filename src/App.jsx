@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { useCollection } from './hooks/useCollection'
 import { getStickerInfo } from './data/album'
 import { getParallel } from './data/parallels'
@@ -9,6 +9,7 @@ import TradeView from './components/TradeView'
 import NeedList from './components/NeedList'
 import ExportPanel from './components/ExportPanel'
 import TypeSelector from './components/TypeSelector'
+import Toast from './components/Toast'
 
 const TABS = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -23,13 +24,20 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home')
   const [recentlyAdded, setRecentlyAdded] = useState([])
   const [pendingFromNeed, setPendingFromNeed] = useState(null)
+  const [toast, setToast] = useState(null)
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type })
+  }, [])
+
+  const dismissToast = useCallback(() => setToast(null), [])
 
   const {
     state,
     addSticker,
     removeOne,
     removeAll,
-    clearCollection,
+    clearCollection: clearCollectionBase,
     importCollection,
     haveAlbum,
     needList,
@@ -43,14 +51,30 @@ export default function App() {
     needCocaCola,
   } = useCollection()
 
+  // Wrap clearCollection to also clear recentlyAdded
+  const clearCollection = useCallback(() => {
+    clearCollectionBase()
+    setRecentlyAdded([])
+    showToast('Collection cleared', 'info')
+  }, [clearCollectionBase, showToast])
+
   const handleAdd = useCallback(
     (code, parallelId) => {
       addSticker(code, parallelId)
       const info = getStickerInfo(code)
       const parallel = getParallel(parallelId)
       setRecentlyAdded((prev) => [{ code, parallelId, parallel, info, addedAt: Date.now() }, ...prev.slice(0, 19)])
+      showToast(`${code} added (${parallel.name})`)
     },
-    [addSticker]
+    [addSticker, showToast]
+  )
+
+  const handleRemove = useCallback(
+    (key, label) => {
+      removeOne(key)
+      if (label) showToast(`${label} removed`, 'info')
+    },
+    [removeOne, showToast]
   )
 
   const handleAddFromNeed = useCallback((code) => {
@@ -70,6 +94,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
+      {/* Toast */}
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} />}
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-950/90 backdrop-blur border-b border-gray-800 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -81,7 +108,7 @@ export default function App() {
             </div>
           </div>
           <button
-            onClick={() => setActiveTab('add')}
+            onClick={() => { setPendingFromNeed(null); setActiveTab('add') }}
             className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors active:scale-95"
           >
             + Add
@@ -101,17 +128,23 @@ export default function App() {
             haveFoil={haveFoil}
             haveCocaCola={haveCocaCola}
             needCocaCola={needCocaCola}
-            entries={entries}
           />
         )}
         {activeTab === 'add' && (
-          <StickerInput onAdd={handleAdd} onRemove={removeOne} recentlyAdded={recentlyAdded} state={state} />
+          <StickerInput
+            onAdd={handleAdd}
+            onRemove={handleRemove}
+            recentlyAdded={recentlyAdded}
+            state={state}
+            externalPending={!!pendingFromNeed}
+            onToast={showToast}
+          />
         )}
         {activeTab === 'album' && (
           <AlbumGrid ownedCodes={ownedCodes} state={state} />
         )}
         {activeTab === 'trade' && (
-          <TradeView duplicates={duplicates} totalTradeValue={totalTradeValue} removeOne={removeOne} />
+          <TradeView duplicates={duplicates} totalTradeValue={totalTradeValue} removeOne={handleRemove} />
         )}
         {activeTab === 'need' && (
           <NeedList needList={needList} totalTradeValue={totalTradeValue} onAdd={handleAddFromNeed} />
@@ -124,6 +157,7 @@ export default function App() {
             state={state}
             importCollection={importCollection}
             clearCollection={clearCollection}
+            onToast={showToast}
           />
         )}
       </main>

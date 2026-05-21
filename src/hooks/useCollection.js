@@ -93,7 +93,15 @@ export function useCollection() {
       try {
         const parsed = typeof data === 'string' ? JSON.parse(data) : data
         if (parsed && parsed.stickers) {
-          update(() => parsed)
+          // Normalise all codes to uppercase
+          const normalised = {}
+          Object.values(parsed.stickers).forEach((entry) => {
+            if (!entry || !entry.code) return
+            const upper = entry.code.toUpperCase().trim()
+            const key = `${upper}::${entry.parallelId || 'base'}`
+            normalised[key] = { ...entry, code: upper, key }
+          })
+          update(() => ({ stickers: normalised }))
         }
       } catch {}
     },

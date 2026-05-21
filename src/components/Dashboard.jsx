@@ -56,7 +56,7 @@ function MiniProgress({ label, have, total, color = 'bg-emerald-500', icon }) {
   )
 }
 
-export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, entries, haveFoil, haveCocaCola, needCocaCola }) {
+export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola }) {
   const totalDuplicates = duplicates.reduce((s, d) => s + d.extraQty, 0)
 
   return (

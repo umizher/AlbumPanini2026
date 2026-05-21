@@ -9,13 +9,15 @@ const escapeCsv = (val) => {
 const toCsv = (rows) => rows.map((r) => r.map(escapeCsv).join(',')).join('\n')
 
 const download = (filename, content, mime = 'text/csv;charset=utf-8;') => {
-  const blob = new Blob([content], { type: mime })
+  const blob = new Blob(['﻿' + content], { type: mime }) // BOM for Excel UTF-8
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 export const exportNeedList = (needList) => {
@@ -61,7 +63,11 @@ export const copyToClipboard = async (text) => {
 }
 
 export const formatNeedListText = (needList) =>
-  needList.map((s) => `${s.code} - ${s.section}: ${s.title}`).join('\n')
+  needList.length === 0
+    ? '(no missing stickers)'
+    : needList.map((s) => `${s.code} - ${s.section}: ${s.title}`).join('\n')
 
 export const formatTradeListText = (tradeItems) =>
-  tradeItems.map((t) => `${t.code} (${t.parallel.name}) x${t.extraQty} = ${t.exchangeValue} base`).join('\n')
+  tradeItems.length === 0
+    ? '(no duplicates)'
+    : tradeItems.map((t) => `${t.code} (${t.parallel.name}) x${t.extraQty} = ${t.exchangeValue} base`).join('\n')
