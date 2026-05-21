@@ -56,38 +56,98 @@ export const TEAMS = [
   { code: 'PAR', name: 'Paraguay', flag: '🇵🇾', confederation: 'CONMEBOL' },
 ]
 
-// Special intro stickers
+// Opening stickers — real codes: FWC1–FWC9 (all FOIL)
+const FWC_TITLES = [
+  'Panini Logo',
+  'Official Emblem',
+  'Official Mascot',
+  'Official Slogan',
+  'Official Ball',
+  'Host Country — Canada',
+  'Host Country — Mexico',
+  'Host Country — USA',
+  'Trophy',
+]
+
+// FIFA Museum stickers — MUS1–MUS11 (World Cup history)
+const MUS_TITLES = [
+  'Uruguay 1930 & 1950',
+  'Italy 1934 & 1938',
+  'Brazil 1958, 1962 & 1970',
+  'England 1966',
+  'West Germany 1954 & 1974',
+  'Argentina 1978 & 1986',
+  'Italy 1982 & 2006',
+  'Germany 1990 & 2014',
+  'Brazil 1994 & 2002',
+  'France 1998 & 2018',
+  'Spain 2010 & Argentina 2022',
+]
+
 const INTRO_STICKERS = [
-  ...Array.from({ length: 9 }, (_, i) => ({
-    code: `OPN${i + 1}`,
+  ...FWC_TITLES.map((title, i) => ({
+    code: `FWC${i + 1}`,
     section: 'Opening',
-    sectionCode: 'OPN',
-    title: i === 0 ? 'Album Cover' : i === 1 ? 'FIFA World Cup 2026 Logo' : i === 2 ? 'Trophy' : i === 3 ? 'Mascot' : `Opening ${i + 1}`,
+    sectionCode: 'FWC',
+    title,
     isSpecial: true,
+    isFoil: true,
     teamCode: null,
     position: i + 1,
     valueMultiplier: 2,
   })),
-  ...Array.from({ length: 11 }, (_, i) => ({
+  ...MUS_TITLES.map((title, i) => ({
     code: `MUS${i + 1}`,
     section: 'FIFA Museum',
     sectionCode: 'MUS',
-    title: `FIFA Museum ${i + 1}`,
+    title,
     isSpecial: i < 3,
+    isFoil: false,
     teamCode: null,
     position: i + 1,
     valueMultiplier: i < 3 ? 2 : 1.2,
   })),
 ]
 
+// Coca-Cola exclusive stickers — 12 total, obtained from Coca-Cola bottles
+// Campaign: April 15 – July 31, 2026 · NOT counted in the 980 album stickers
+export const COCA_COLA_STICKERS = [
+  { code: 'CC1',  player: 'Lamine Yamal',      team: 'ESP', flag: '🇪🇸' },
+  { code: 'CC2',  player: 'Joshua Kimmich',     team: 'GER', flag: '🇩🇪' },
+  { code: 'CC3',  player: 'Harry Kane',         team: 'ENG', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { code: 'CC4',  player: 'Santiago Giménez',   team: 'MEX', flag: '🇲🇽' },
+  { code: 'CC5',  player: 'Antonee Robinson',   team: 'USA', flag: '🇺🇸' },
+  { code: 'CC6',  player: 'Jefferson Lerma',    team: 'COL', flag: '🇨🇴' },
+  { code: 'CC7',  player: 'Edson Álvarez',      team: 'MEX', flag: '🇲🇽' },
+  { code: 'CC8',  player: 'Virgil van Dijk',    team: 'NED', flag: '🇳🇱' },
+  { code: 'CC9',  player: 'Alphonso Davies',    team: 'CAN', flag: '🇨🇦' },
+  { code: 'CC10', player: 'Weston McKennie',    team: 'USA', flag: '🇺🇸' },
+  { code: 'CC11', player: 'Lautaro Martínez',   team: 'ARG', flag: '🇦🇷' },
+  { code: 'CC12', player: 'Gabriel Magalhães',  team: 'BRA', flag: '🇧🇷' },
+].map((s) => ({
+  ...s,
+  section: 'Coca-Cola Exclusive',
+  sectionCode: 'CC',
+  title: s.player,
+  isSpecial: true,
+  isFoil: false,
+  isCocaCola: true,
+  teamCode: s.team,
+  position: parseInt(s.code.replace('CC', '')),
+  valueMultiplier: 3,
+}))
+
+export const COCA_COLA_MAP = Object.fromEntries(COCA_COLA_STICKERS.map((s) => [s.code, s]))
+
 // Sticker positions per team (20 total)
 const TEAM_POSITIONS = [
-  { pos: 1, label: 'Team Badge', isSpecial: true, valueMultiplier: 2.5 },
-  { pos: 2, label: 'Team Photo', isSpecial: false, valueMultiplier: 1.5 },
+  { pos: 1, label: 'Team Badge', isSpecial: true, isFoil: true, valueMultiplier: 2.5 },
+  { pos: 2, label: 'Team Photo', isSpecial: false, isFoil: false, valueMultiplier: 1.5 },
   ...Array.from({ length: 18 }, (_, i) => ({
     pos: i + 3,
     label: `Player ${i + 1}`,
     isSpecial: false,
+    isFoil: false,
     valueMultiplier: 1,
   })),
 ]
@@ -95,13 +155,15 @@ const TEAM_POSITIONS = [
 const generateTeamStickers = () => {
   const stickers = []
   TEAMS.forEach((team) => {
-    TEAM_POSITIONS.forEach(({ pos, label, isSpecial, valueMultiplier }) => {
+    TEAM_POSITIONS.forEach(({ pos, label, isSpecial, isFoil, valueMultiplier }) => {
       stickers.push({
         code: `${team.code}${pos}`,
         section: team.name,
         sectionCode: team.code,
         title: label,
         isSpecial,
+        isFoil,
+        isCocaCola: false,
         teamCode: team.code,
         teamName: team.name,
         flag: team.flag,
@@ -114,9 +176,14 @@ const generateTeamStickers = () => {
   return stickers
 }
 
+// Main album: 9 FWC + 11 MUS + 48×20 = 980 stickers
 export const ALBUM_STICKERS = [...INTRO_STICKERS, ...generateTeamStickers()]
 export const ALBUM_MAP = Object.fromEntries(ALBUM_STICKERS.map((s) => [s.code, s]))
-export const TOTAL_STICKERS = ALBUM_STICKERS.length
+export const TOTAL_STICKERS = ALBUM_STICKERS.length // 980
+
+// All stickers including Coca-Cola exclusives
+export const ALL_STICKERS_MAP = { ...ALBUM_MAP, ...COCA_COLA_MAP }
+export const TOTAL_FOIL_STICKERS = ALBUM_STICKERS.filter((s) => s.isFoil).length // 57
 
 export const CONFEDERATION_ORDER = ['CONCACAF', 'CONMEBOL', 'UEFA', 'AFC', 'CAF', 'OFC']
 
@@ -124,12 +191,14 @@ export const getTeam = (code) => TEAMS.find((t) => t.code === code)
 
 export const getStickerInfo = (code) => {
   const upper = code.toUpperCase().trim()
-  return ALBUM_MAP[upper] || {
+  return ALL_STICKERS_MAP[upper] || {
     code: upper,
     section: 'Unknown',
     sectionCode: 'UNK',
     title: upper,
     isSpecial: false,
+    isFoil: false,
+    isCocaCola: false,
     teamCode: null,
     position: null,
     valueMultiplier: 1,

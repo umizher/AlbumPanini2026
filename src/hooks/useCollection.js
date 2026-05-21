@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import { ALBUM_MAP, ALBUM_STICKERS, getStickerInfo } from '../data/album'
+import { ALBUM_MAP, ALBUM_STICKERS, COCA_COLA_STICKERS, COCA_COLA_MAP, getStickerInfo } from '../data/album'
 import { getParallel } from '../data/parallels'
 
 const STORAGE_KEY = 'panini-wc2026-v1'
@@ -102,66 +102,39 @@ export function useCollection() {
 
   const computed = useMemo(() => {
     const entries = Object.values(state.stickers)
-
-    // All unique codes owned (at least 1 of any parallel)
     const ownedCodes = new Set(entries.map((e) => e.code))
 
-    // Total entries including all parallels
-    const totalOwned = entries.length
-
-    // Stickers in album that user has (any parallel)
+    // Main album (980 stickers)
     const haveAlbum = ALBUM_STICKERS.filter((s) => ownedCodes.has(s.code))
-
-    // Stickers in album that user is missing
     const needList = ALBUM_STICKERS.filter((s) => !ownedCodes.has(s.code))
 
-    // Duplicate entries (quantity > 1 or same code with different parallels)
-    // Duplicates = any quantity beyond 1 copy of any variant
-    const duplicates = entries
-      .filter((e) => e.quantity > 1)
-      .map((e) => {
-        const info = getStickerInfo(e.code)
-        const parallel = getParallel(e.parallelId)
-        const extraQty = e.quantity - 1
-        const exchangeValue = Math.round(parallel.multiplier * info.valueMultiplier * extraQty * 10) / 10
-        return { ...e, info, parallel, extraQty, exchangeValue }
-      })
-      .sort((a, b) => b.exchangeValue - a.exchangeValue)
+    // Foil stickers (special) within main album
+    const haveFoil = haveAlbum.filter((s) => s.isFoil)
 
-    // Extra parallels (different parallel of a sticker already owned as base)
-    const extraParallels = entries
-      .filter((e) => {
-        const info = getStickerInfo(e.code)
-        const parallel = getParallel(e.parallelId)
-        // It's "extra" if they have the base version AND this is a non-base parallel
-        // OR if quantity > 1 regardless
-        return e.parallelId !== 'base' && ownedCodes.has(e.code)
-      })
+    // Coca-Cola exclusives (12 stickers, separate from 980)
+    const haveCocaCola = COCA_COLA_STICKERS.filter((s) => ownedCodes.has(s.code))
+    const needCocaCola = COCA_COLA_STICKERS.filter((s) => !ownedCodes.has(s.code))
 
-    // All tradeable items (duplicates + extra parallels if you want to trade them)
+    // All tradeable items (duplicates: quantity > 1)
     const allTradeItems = entries
       .flatMap((e) => {
         const info = getStickerInfo(e.code)
         const parallel = getParallel(e.parallelId)
-        const results = []
-        // All extras (quantity - 1)
         if (e.quantity > 1) {
           const extraQty = e.quantity - 1
-          results.push({
+          return [{
             ...e,
             info,
             parallel,
             extraQty,
             exchangeValue: Math.round(parallel.multiplier * info.valueMultiplier * extraQty * 10) / 10,
-            reason: 'duplicate',
-          })
+          }]
         }
-        return results
+        return []
       })
       .sort((a, b) => b.exchangeValue - a.exchangeValue)
 
     const totalTradeValue = allTradeItems.reduce((sum, d) => sum + d.exchangeValue, 0)
-
     const completionPct = Math.round((haveAlbum.length / ALBUM_STICKERS.length) * 1000) / 10
 
     return {
@@ -169,10 +142,13 @@ export function useCollection() {
       ownedCodes,
       haveAlbum,
       needList,
+      haveFoil,
+      haveCocaCola,
+      needCocaCola,
       duplicates: allTradeItems,
       totalTradeValue: Math.round(totalTradeValue * 10) / 10,
       completionPct,
-      totalOwned,
+      totalOwned: entries.length,
     }
   }, [state.stickers])
 

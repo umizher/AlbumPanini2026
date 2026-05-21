@@ -38,6 +38,9 @@ export default function App() {
     completionPct,
     entries,
     ownedCodes,
+    haveFoil,
+    haveCocaCola,
+    needCocaCola,
   } = useCollection()
 
   const handleAdd = useCallback(
@@ -95,6 +98,9 @@ export default function App() {
             duplicates={duplicates}
             totalTradeValue={totalTradeValue}
             completionPct={completionPct}
+            haveFoil={haveFoil}
+            haveCocaCola={haveCocaCola}
+            needCocaCola={needCocaCola}
             entries={entries}
           />
         )}

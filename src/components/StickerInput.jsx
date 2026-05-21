@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { getStickerInfo, ALBUM_MAP } from '../data/album'
+import { getStickerInfo, ALBUM_MAP, COCA_COLA_MAP } from '../data/album'
 import TypeSelector from './TypeSelector'
 
 export default function StickerInput({ onAdd, recentlyAdded = [] }) {
@@ -28,8 +28,11 @@ export default function StickerInput({ onAdd, recentlyAdded = [] }) {
     inputRef.current?.focus()
   }
 
-  const info = code.trim() ? getStickerInfo(code.trim().toUpperCase()) : null
-  const isKnown = code.trim() ? !!ALBUM_MAP[code.trim().toUpperCase()] : false
+  const upper = code.trim().toUpperCase()
+  const info = upper.length > 1 ? getStickerInfo(upper) : null
+  const isKnownAlbum = upper.length > 1 && !!ALBUM_MAP[upper]
+  const isKnownCC = upper.length > 1 && !!COCA_COLA_MAP[upper]
+  const isKnown = isKnownAlbum || isKnownCC
 
   return (
     <div className="flex flex-col gap-4">
@@ -42,7 +45,7 @@ export default function StickerInput({ onAdd, recentlyAdded = [] }) {
               type="text"
               value={code}
               onChange={(e) => { setCode(e.target.value.toUpperCase()); setError('') }}
-              placeholder="e.g. BRA5 or USA12 or OPN1"
+              placeholder="e.g. BRA5, FWC1, MUS3, CC1…"
               className="w-full bg-gray-800 border-2 border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-gray-600 outline-none transition-colors uppercase"
               autoComplete="off"
               autoCapitalize="characters"
@@ -57,12 +60,18 @@ export default function StickerInput({ onAdd, recentlyAdded = [] }) {
             )}
           </div>
 
-          {info && code.trim().length > 2 && (
-            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${isKnown ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'}`}>
-              <span>{isKnown ? '✓' : '?'}</span>
+          {info && upper.length > 2 && (
+            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+              isKnownCC ? 'bg-red-950 text-red-300' :
+              isKnownAlbum ? 'bg-emerald-950 text-emerald-400' :
+              'bg-amber-950 text-amber-400'
+            }`}>
+              <span>{isKnown ? (isKnownCC ? '🥤' : '✓') : '?'}</span>
               <span>
-                {isKnown
-                  ? `${info.section} · ${info.title}${info.isSpecial ? ' (special)' : ''}`
+                {isKnownCC
+                  ? `Coca-Cola Exclusive · ${info.title} (${info.teamCode})`
+                  : isKnownAlbum
+                  ? `${info.section} · ${info.title}${info.isFoil ? ' ✨ FOIL' : info.isSpecial ? ' (special)' : ''}`
                   : 'Unknown code — will be added as custom'}
               </span>
             </div>

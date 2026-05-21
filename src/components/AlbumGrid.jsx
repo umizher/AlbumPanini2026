@@ -1,24 +1,28 @@
 import { useState } from 'react'
-import { TEAMS, ALBUM_STICKERS, CONFEDERATION_ORDER } from '../data/album'
+import { TEAMS, ALBUM_STICKERS, CONFEDERATION_ORDER, COCA_COLA_STICKERS } from '../data/album'
 import { getParallel } from '../data/parallels'
 
 const FILTERS = ['All', 'Have', 'Need', 'Duplicate']
 
 function StickerDot({ sticker, owned, parallel }) {
   const base =
-    owned === 'have'
-      ? `bg-emerald-600 border-emerald-500`
+    sticker.isCocaCola
+      ? owned === 'have' || owned === 'dup'
+        ? 'bg-red-700 border-red-500'
+        : 'bg-red-950/50 border-red-900'
+      : owned === 'have'
+      ? 'bg-emerald-600 border-emerald-500'
       : owned === 'dup'
-      ? `bg-amber-500 border-amber-400`
+      ? 'bg-amber-500 border-amber-400'
       : 'bg-gray-800 border-gray-700'
 
   return (
     <div
-      title={`${sticker.code} — ${sticker.title}${parallel ? ` (${parallel.name})` : ''}`}
-      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md border flex items-center justify-center text-xs font-mono font-bold transition-all ${base} ${sticker.isSpecial ? 'ring-1 ring-yellow-500/50' : ''}`}
+      title={`${sticker.code} — ${sticker.title}${parallel ? ` (${parallel.name})` : ''}${sticker.isFoil ? ' ✨ FOIL' : ''}${sticker.isCocaCola ? ' 🥤 Coca-Cola' : ''}`}
+      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md border flex items-center justify-center transition-all ${base} ${sticker.isFoil ? 'ring-2 ring-yellow-400/60' : sticker.isCocaCola ? 'ring-2 ring-red-400/60' : ''}`}
     >
-      <span className={`${owned === 'have' || owned === 'dup' ? 'text-white' : 'text-gray-600'} text-[9px] sm:text-[10px] leading-none`}>
-        {sticker.position || sticker.code.replace(/[A-Z]/g, '')}
+      <span className={`${owned === 'have' || owned === 'dup' ? 'text-white' : sticker.isCocaCola ? 'text-red-700' : 'text-gray-600'} text-[9px] sm:text-[10px] leading-none font-mono font-bold`}>
+        {sticker.isCocaCola ? sticker.position : (sticker.position || sticker.code.replace(/[A-Z]/g, ''))}
       </span>
     </div>
   )
@@ -126,15 +130,59 @@ export default function AlbumGrid({ ownedCodes, state }) {
         ))}
       </div>
 
-      {/* Intro section */}
+      {/* Intro section (FWC + Museum) */}
       {(filter === 'All' || filter === 'Have' || filter === 'Need') && confFilter === 'All' && !search && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="font-semibold text-white text-sm mb-3">🌍 Introduction & Museum</p>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="font-semibold text-white text-sm">🌍 Opening & FIFA Museum</p>
+            <span className="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">FWC1–FWC9 · MUS1–MUS11</span>
+          </div>
           <div className="flex flex-wrap gap-1">
             {introStickers.map((s) => {
-              const entries = Object.values(state.stickers).filter((e) => e.code === s.code)
-              const status = entries.length ? (entries.reduce((sum, e) => sum + e.quantity, 0) > 1 ? 'dup' : 'have') : 'none'
+              const stickerEntries = Object.values(state.stickers).filter((e) => e.code === s.code)
+              const status = stickerEntries.length ? (stickerEntries.reduce((sum, e) => sum + e.quantity, 0) > 1 ? 'dup' : 'have') : 'none'
               return <StickerDot key={s.code} sticker={s} owned={status} parallel={null} />
+            })}
+          </div>
+          <p className="text-[10px] text-gray-600 mt-2 flex items-center gap-1">
+            <span className="inline-block w-2 h-2 rounded-sm ring-2 ring-yellow-400/60 bg-gray-800" /> = FOIL sticker
+          </p>
+        </div>
+      )}
+
+      {/* Coca-Cola exclusive section */}
+      {(filter === 'All' || filter === 'Have' || filter === 'Need') && confFilter === 'All' && !search && (
+        <div className="bg-red-950/20 border border-red-900/40 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">🥤</span>
+            <p className="font-semibold text-white text-sm">Coca-Cola Exclusives</p>
+            <span className="text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full ml-1">CC1–CC12</span>
+          </div>
+          <p className="text-[10px] text-red-400/70 mb-3">Only from Coca-Cola 20oz bottles · Not in standard packs</p>
+          <div className="flex flex-wrap gap-1">
+            {COCA_COLA_STICKERS.map((s) => {
+              const stickerEntries = Object.values(state.stickers).filter((e) => e.code === s.code)
+              const status = stickerEntries.length ? (stickerEntries.reduce((sum, e) => sum + e.quantity, 0) > 1 ? 'dup' : 'have') : 'none'
+              return (
+                <div key={s.code} title={`${s.code} — ${s.player} (${s.team})`} className="flex flex-col items-center gap-0.5">
+                  <StickerDot sticker={s} owned={status} parallel={null} />
+                  <span className="text-[8px] text-red-500/70 font-mono">{s.code}</span>
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-1">
+            {COCA_COLA_STICKERS.map((s) => {
+              const stickerEntries = Object.values(state.stickers).filter((e) => e.code === s.code)
+              const have = stickerEntries.length > 0
+              return (
+                <div key={s.code} className={`flex items-center gap-2 text-xs px-2 py-1 rounded-lg ${have ? 'bg-red-900/30 text-red-300' : 'text-gray-600'}`}>
+                  <span>{s.flag}</span>
+                  <span className="font-mono text-[10px] text-red-400/70">{s.code}</span>
+                  <span className="truncate">{s.player}</span>
+                  {have && <span className="ml-auto text-green-400">✓</span>}
+                </div>
+              )
             })}
           </div>
         </div>
