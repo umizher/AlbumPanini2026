@@ -105,7 +105,7 @@ export default function App() {
           />
         )}
         {activeTab === 'add' && (
-          <StickerInput onAdd={handleAdd} recentlyAdded={recentlyAdded} />
+          <StickerInput onAdd={handleAdd} onRemove={removeOne} recentlyAdded={recentlyAdded} state={state} />
         )}
         {activeTab === 'album' && (
           <AlbumGrid ownedCodes={ownedCodes} state={state} />
