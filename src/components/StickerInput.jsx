@@ -39,41 +39,50 @@ function ParallelPicker({ code, entries, onSelect, onCancel }) {
 
 export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], state, externalPending = false, onToast }) {
   const [code, setCode] = useState('')
-  const [pending, setPending] = useState(null)
+  const [batch, setBatch] = useState(null)
   const [pendingRemoveEntries, setPendingRemoveEntries] = useState(null)
   const [mode, setMode] = useState('add')
   const inputRef = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const upper = code.trim().toUpperCase()
-    if (!upper) return
+    const raw = code.trim().toUpperCase()
+    if (!raw) return
 
     if (mode === 'remove') {
-      const owned = Object.values(state.stickers).filter((s) => s.code === upper)
+      const owned = Object.values(state.stickers).filter((s) => s.code === raw)
       if (owned.length === 0) {
-        onToast?.(`${upper} not in collection`, 'error')
+        onToast?.(`${raw} not in collection`, 'error')
         return
       }
       if (owned.length === 1) {
-        onRemove(owned[0].key, upper)
-        setCode('')
-        setTimeout(() => inputRef.current?.focus(), 100)
+        onRemove(owned[0].key, raw)
       } else {
-        setPendingRemoveEntries({ code: upper, entries: owned })
+        setPendingRemoveEntries({ code: raw, entries: owned })
       }
+      setCode('')
+      setTimeout(() => inputRef.current?.focus(), 100)
       return
     }
 
     if (externalPending) return
-    setPending(upper)
+
+    // Parse batch: split by comma or whitespace
+    const codes = raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+    if (codes.length === 0) return
+    setBatch({ queue: codes, total: codes.length })
+    setCode('')
   }
 
-  const handleSelect = (parallelId) => {
-    onAdd(pending, parallelId)
-    setPending(null)
-    setCode('')
-    setTimeout(() => inputRef.current?.focus(), 100)
+  const handleBatchSelect = (parallelId) => {
+    onAdd(batch.queue[0], parallelId)
+    const remaining = batch.queue.slice(1)
+    if (remaining.length > 0) {
+      setBatch({ queue: remaining, total: batch.total })
+    } else {
+      setBatch(null)
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
   }
 
   const handleRemoveEntry = (entry) => {
@@ -84,18 +93,20 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
   }
 
   const upper = code.trim().toUpperCase()
-  const info = upper.length > 0 ? getStickerInfo(upper) : null
-  const isKnownAlbum = upper.length > 0 && !!ALBUM_MAP[upper]
-  const isKnownCC = upper.length > 0 && !!COCA_COLA_MAP[upper]
+  const rawCodes = upper.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+  const isBatch = rawCodes.length > 1
+  const primaryCode = rawCodes[0] || ''
+  const info = primaryCode.length > 0 ? getStickerInfo(primaryCode) : null
+  const isKnownAlbum = primaryCode.length > 0 && !!ALBUM_MAP[primaryCode]
+  const isKnownCC = primaryCode.length > 0 && !!COCA_COLA_MAP[primaryCode]
   const isKnown = isKnownAlbum || isKnownCC
-
-  const ownedEntries = upper.length > 0
-    ? Object.values(state.stickers).filter((s) => s.code === upper)
+  const isRemove = mode === 'remove'
+  const ownedEntries = primaryCode.length > 0 && isRemove
+    ? Object.values(state.stickers).filter((s) => s.code === primaryCode)
     : []
   const isOwned = ownedEntries.length > 0
-  const isRemove = mode === 'remove'
 
-  const canSubmit = upper.length > 0 && (!isRemove || isOwned) && (!isRemove || true) && !(externalPending && !isRemove)
+  const canSubmit = upper.length > 0 && !(externalPending && !isRemove) && (!isRemove || isOwned)
 
   return (
     <div className="flex flex-col gap-4">
@@ -147,25 +158,39 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
           </div>
 
           {/* Info tag */}
-          {info && upper.length > 0 && (
-            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
-              isRemove
-                ? isOwned ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-500'
-                : isKnownCC ? 'bg-red-950 text-red-300'
+          {upper.length > 0 && !isRemove && (
+            isBatch ? (
+              <div className="text-xs px-3 py-2 rounded-lg flex items-center gap-2 bg-emerald-950 text-emerald-400">
+                <span>📦</span>
+                <span>{rawCodes.length} stickers: {rawCodes.join(', ')}</span>
+              </div>
+            ) : info && primaryCode.length > 0 ? (
+              <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+                isKnownCC ? 'bg-red-950 text-red-300'
                 : isKnownAlbum ? 'bg-emerald-950 text-emerald-400'
                 : 'bg-amber-950 text-amber-400'
+              }`}>
+                <span>{isKnown ? (isKnownCC ? '🥤' : '✓') : '?'}</span>
+                <span className="flex-1 truncate">
+                  {isKnownCC
+                    ? `Coca-Cola Exclusive · ${info.title} (${info.teamCode})`
+                    : isKnownAlbum
+                    ? `${info.section} · ${info.title}${info.isFoil ? ' ✨ FOIL' : info.isSpecial ? ' · special' : ''}`
+                    : 'Unknown code — will be saved as custom'}
+                </span>
+              </div>
+            ) : null
+          )}
+          {/* Remove info tag */}
+          {upper.length > 0 && isRemove && info && (
+            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+              isOwned ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-500'
             }`}>
-              <span>{isRemove ? (isOwned ? '🗑️' : '✕') : isKnown ? (isKnownCC ? '🥤' : '✓') : '?'}</span>
+              <span>{isOwned ? '🗑️' : '✕'}</span>
               <span className="flex-1 truncate">
-                {isRemove
-                  ? isOwned
-                    ? `In collection — ${ownedEntries.map((e) => `${getParallel(e.parallelId).name} ×${e.quantity}`).join(', ')}`
-                    : 'Not in your collection'
-                  : isKnownCC
-                  ? `Coca-Cola Exclusive · ${info.title} (${info.teamCode})`
-                  : isKnownAlbum
-                  ? `${info.section} · ${info.title}${info.isFoil ? ' ✨ FOIL' : info.isSpecial ? ' · special' : ''}`
-                  : 'Unknown code — will be saved as custom'}
+                {isOwned
+                  ? `In collection — ${ownedEntries.map((e) => `${getParallel(e.parallelId).name} ×${e.quantity}`).join(', ')}`
+                  : 'Not in your collection'}
               </span>
             </div>
           )}
@@ -175,7 +200,7 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
             disabled={!canSubmit}
             className={`w-full disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold py-3 rounded-xl transition-colors text-base active:scale-95 ${isRemove ? 'bg-red-700 hover:bg-red-600' : 'bg-emerald-600 hover:bg-emerald-500'}`}
           >
-            {isRemove ? '🗑️ Remove →' : externalPending ? 'Select parallel type above ↑' : 'Add Sticker →'}
+            {isRemove ? '🗑️ Remove →' : externalPending ? 'Select parallel type above ↑' : isBatch ? `Add ${rawCodes.length} Stickers →` : 'Add Sticker →'}
           </button>
         </form>
       </div>
@@ -204,9 +229,14 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
         </div>
       )}
 
-      {/* Type selector for add mode */}
-      {pending && !externalPending && (
-        <TypeSelector code={pending} onSelect={handleSelect} onCancel={() => { setPending(null); inputRef.current?.focus() }} />
+      {/* Type selector for batch add mode */}
+      {batch && !externalPending && (
+        <TypeSelector
+          code={batch.queue[0]}
+          progress={batch.total > 1 ? `${batch.total - batch.queue.length + 1} of ${batch.total}` : null}
+          onSelect={handleBatchSelect}
+          onCancel={() => { setBatch(null); setCode(''); setTimeout(() => inputRef.current?.focus(), 100) }}
+        />
       )}
 
       {/* Parallel picker for remove with multiple variants */}

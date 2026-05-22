@@ -1,6 +1,6 @@
 import { PARALLEL_LIST } from '../data/parallels'
 
-export default function TypeSelector({ code, onSelect, onCancel }) {
+export default function TypeSelector({ code, onSelect, onCancel, progress }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onCancel}>
       <div
@@ -9,8 +9,15 @@ export default function TypeSelector({ code, onSelect, onCancel }) {
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest">Adding sticker</p>
+            <p className="text-xs text-gray-400 uppercase tracking-widest">
+              {progress ? `Sticker ${progress}` : 'Adding sticker'}
+            </p>
             <h2 className="text-xl font-bold text-white">{code}</h2>
+            {progress && (
+              <p className="text-xs text-emerald-400 mt-0.5">
+                Select parallel type for each sticker
+              </p>
+            )}
           </div>
           <button onClick={onCancel} className="text-gray-400 hover:text-white text-2xl leading-none">✕</button>
         </div>

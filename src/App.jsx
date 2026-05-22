@@ -144,7 +144,13 @@ export default function App() {
           <AlbumGrid ownedCodes={ownedCodes} state={state} />
         )}
         {activeTab === 'trade' && (
-          <TradeView duplicates={duplicates} totalTradeValue={totalTradeValue} removeOne={handleRemove} />
+          <TradeView
+            duplicates={duplicates}
+            totalTradeValue={totalTradeValue}
+            removeOne={handleRemove}
+            addSticker={addSticker}
+            onToast={showToast}
+          />
         )}
         {activeTab === 'need' && (
           <NeedList needList={needList} totalTradeValue={totalTradeValue} onAdd={handleAddFromNeed} />

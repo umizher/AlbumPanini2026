@@ -123,24 +123,45 @@ export function useCollection() {
     const haveCocaCola = COCA_COLA_STICKERS.filter((s) => ownedCodes.has(s.code))
     const needCocaCola = COCA_COLA_STICKERS.filter((s) => !ownedCodes.has(s.code))
 
-    // All tradeable items (duplicates: quantity > 1)
-    const allTradeItems = entries
-      .flatMap((e) => {
-        const info = getStickerInfo(e.code)
-        const parallel = getParallel(e.parallelId)
-        if (e.quantity > 1) {
-          const extraQty = e.quantity - 1
-          return [{
-            ...e,
-            info,
-            parallel,
-            extraQty,
-            exchangeValue: Math.round(parallel.multiplier * info.valueMultiplier * extraQty * 10) / 10,
-          }]
-        }
-        return []
+    // All tradeable items — group by code for cross-parallel duplicate detection.
+    // Example: CC1::base×1 + CC1::blue×1 = 2 total → 1 spare (keep the blue for album).
+    const byCode = {}
+    entries.forEach((entry) => {
+      if (!byCode[entry.code]) byCode[entry.code] = []
+      byCode[entry.code].push(entry)
+    })
+
+    const allTradeItems = []
+    Object.values(byCode).forEach((codeEntries) => {
+      const totalQty = codeEntries.reduce((sum, e) => sum + e.quantity, 0)
+      if (totalQty <= 1) return
+
+      // Sort highest multiplier first — keep the most valuable copy for the album
+      const sorted = [...codeEntries].sort(
+        (a, b) => getParallel(b.parallelId).multiplier - getParallel(a.parallelId).multiplier
+      )
+
+      let spare = totalQty - 1
+      sorted.forEach((entry, idx) => {
+        if (spare <= 0) return
+        const keepForAlbum = idx === 0 ? 1 : 0 // keep 1 of the best parallel for the album
+        const available = entry.quantity - keepForAlbum
+        if (available <= 0) return
+        const extraQty = Math.min(available, spare)
+        spare -= extraQty
+        if (extraQty <= 0) return
+        const parallel = getParallel(entry.parallelId)
+        const info = getStickerInfo(entry.code)
+        allTradeItems.push({
+          ...entry,
+          info,
+          parallel,
+          extraQty,
+          exchangeValue: Math.round(parallel.multiplier * info.valueMultiplier * extraQty * 10) / 10,
+        })
       })
-      .sort((a, b) => b.exchangeValue - a.exchangeValue)
+    })
+    allTradeItems.sort((a, b) => b.exchangeValue - a.exchangeValue)
 
     const totalTradeValue = allTradeItems.reduce((sum, d) => sum + d.exchangeValue, 0)
     const completionPct = Math.round((haveAlbum.length / ALBUM_STICKERS.length) * 1000) / 10

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { exportTradeList, copyToClipboard, formatTradeListText } from '../utils/export'
+import RecordTrade from './RecordTrade'
 
 function TradeCard({ item, onRemoveOne }) {
   return (
@@ -19,7 +20,7 @@ function TradeCard({ item, onRemoveOne }) {
         </div>
       </div>
       <button
-        onClick={() => onRemoveOne(item.key)}
+        onClick={() => onRemoveOne(item.key, item.code)}
         className="text-gray-600 hover:text-red-400 text-lg p-1 transition-colors"
         title="Remove one duplicate"
       >−</button>
@@ -27,8 +28,9 @@ function TradeCard({ item, onRemoveOne }) {
   )
 }
 
-export default function TradeView({ duplicates, totalTradeValue, removeOne }) {
+export default function TradeView({ duplicates, totalTradeValue, removeOne, addSticker, onToast }) {
   const [copied, setCopied] = useState(false)
+  const [showRecordTrade, setShowRecordTrade] = useState(false)
 
   const handleCopy = async () => {
     const ok = await copyToClipboard(formatTradeListText(duplicates))
@@ -64,6 +66,14 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne }) {
           </div>
         </div>
       </div>
+
+      {/* Record trade CTA */}
+      <button
+        onClick={() => setShowRecordTrade(true)}
+        className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-3 rounded-2xl text-sm transition-colors active:scale-95 flex items-center justify-center gap-2"
+      >
+        <span>🤝</span> Record a Trade
+      </button>
 
       {/* Trade calculator hint */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
@@ -110,6 +120,16 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne }) {
       </div>
 
       <div className="h-2" />
+
+      {showRecordTrade && (
+        <RecordTrade
+          duplicates={duplicates}
+          onRemoveOne={removeOne}
+          onAdd={addSticker}
+          onClose={() => setShowRecordTrade(false)}
+          onToast={onToast}
+        />
+      )}
     </div>
   )
 }
