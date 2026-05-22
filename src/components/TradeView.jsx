@@ -3,6 +3,7 @@ import { exportTradeList, copyToClipboard, formatTradeListText } from '../utils/
 import RecordTrade from './RecordTrade'
 
 function TradeCard({ item, onRemoveOne }) {
+  const searchUrl = `https://www.google.com/search?q=panini+world+cup+2026+${item.code}+${encodeURIComponent(item.info.title)}+precio+intercambio`
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-3">
       <span className="text-2xl">{item.parallel.emoji}</span>
@@ -19,6 +20,13 @@ function TradeCard({ item, onRemoveOne }) {
           <span className="text-xs text-blue-400 font-semibold">= {item.exchangeValue} base stickers</span>
         </div>
       </div>
+      <a
+        href={searchUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-gray-600 hover:text-blue-400 text-base p-1 transition-colors"
+        title="Search market value on Google"
+      >🔍</a>
       <button
         onClick={() => onRemoveOne(item.key, item.code)}
         className="text-gray-600 hover:text-red-400 text-lg p-1 transition-colors"
