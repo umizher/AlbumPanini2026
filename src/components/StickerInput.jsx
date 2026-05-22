@@ -145,7 +145,7 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="e.g. BRA5, FWC1, MUS3, CC1…"
+              placeholder="e.g. BRA5, FWC1, FWC12, CC1…"
               className={`w-full bg-gray-800 border-2 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-gray-600 outline-none transition-colors uppercase ${isRemove ? 'border-gray-700 focus:border-red-500' : 'border-gray-700 focus:border-emerald-500'}`}
               autoComplete="off"
               autoCapitalize="characters"

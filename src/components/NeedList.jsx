@@ -27,7 +27,7 @@ export default function NeedList({ needList, totalTradeValue, onAdd }) {
   // Group stickers
   const grouped = {}
   filtered.forEach((s) => {
-    const key = groupBy === 'team' ? s.section : s.sectionCode === 'OPN' || s.sectionCode === 'MUS' ? 'Intro' : s.confederation || 'Other'
+    const key = groupBy === 'team' ? s.section : s.sectionCode === 'FWC' ? 'Intro' : s.confederation || 'Other'
     if (!grouped[key]) grouped[key] = []
     grouped[key].push(s)
   })

@@ -69,7 +69,7 @@ const FWC_TITLES = [
   'Trophy',
 ]
 
-// FIFA Museum stickers — MUS1–MUS11 (World Cup history)
+// FIFA Museum stickers — FWC10–FWC20 (continuation of FWC series)
 const MUS_TITLES = [
   'Uruguay 1930 & 1950',
   'Italy 1934 & 1938',
@@ -97,9 +97,9 @@ const INTRO_STICKERS = [
     valueMultiplier: 2,
   })),
   ...MUS_TITLES.map((title, i) => ({
-    code: `MUS${i + 1}`,
+    code: `FWC${i + 10}`,
     section: 'FIFA Museum',
-    sectionCode: 'MUS',
+    sectionCode: 'FWC',
     title,
     isSpecial: i < 3,
     isFoil: false,
@@ -176,7 +176,7 @@ const generateTeamStickers = () => {
   return stickers
 }
 
-// Main album: 9 FWC + 11 MUS + 48×20 = 980 stickers
+// Main album: 20 FWC (FWC1–FWC20) + 48×20 = 980 stickers
 export const ALBUM_STICKERS = [...INTRO_STICKERS, ...generateTeamStickers()]
 export const ALBUM_MAP = Object.fromEntries(ALBUM_STICKERS.map((s) => [s.code, s]))
 export const TOTAL_STICKERS = ALBUM_STICKERS.length // 980

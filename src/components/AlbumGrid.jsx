@@ -135,7 +135,7 @@ export default function AlbumGrid({ ownedCodes, state }) {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <p className="font-semibold text-white text-sm">🌍 Opening & FIFA Museum</p>
-            <span className="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">FWC1–FWC9 · MUS1–MUS11</span>
+            <span className="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">FWC1–FWC20</span>
           </div>
           <div className="flex flex-wrap gap-1">
             {introStickers.map((s) => {

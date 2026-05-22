@@ -4,10 +4,29 @@ import { getParallel } from '../data/parallels'
 
 const STORAGE_KEY = 'panini-wc2026-v1'
 
+// MUS1–MUS11 were renamed to FWC10–FWC20 — migrate saved data automatically
+const migrateMUStoFWC = (state) => {
+  const hasLegacy = Object.values(state.stickers).some((e) => /^MUS\d+$/.test(e.code))
+  if (!hasLegacy) return state
+  const remap = {}
+  for (let i = 1; i <= 11; i++) remap[`MUS${i}`] = `FWC${i + 9}`
+  const migrated = {}
+  Object.values(state.stickers).forEach((entry) => {
+    const newCode = remap[entry.code] || entry.code
+    const newKey = `${newCode}::${entry.parallelId}`
+    migrated[newKey] = { ...entry, code: newCode, key: newKey }
+  })
+  return { ...state, stickers: migrated }
+}
+
 const loadState = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : { stickers: {} }
+    if (!raw) return { stickers: {} }
+    const state = JSON.parse(raw)
+    const migrated = migrateMUStoFWC(state)
+    if (migrated !== state) saveState(migrated)
+    return migrated
   } catch {
     return { stickers: {} }
   }
