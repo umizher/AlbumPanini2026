@@ -85,6 +85,17 @@ const MUS_TITLES = [
 ]
 
 const INTRO_STICKERS = [
+  {
+    code: '00',
+    section: 'Opening',
+    sectionCode: 'FWC',
+    title: 'FIFA World Cup 2026',
+    isSpecial: false,
+    isFoil: false,
+    teamCode: null,
+    position: null,
+    valueMultiplier: 1,
+  },
   ...FWC_TITLES.map((title, i) => ({
     code: `FWC${i + 1}`,
     section: 'Opening',
@@ -104,7 +115,7 @@ const INTRO_STICKERS = [
     isSpecial: i < 3,
     isFoil: false,
     teamCode: null,
-    position: i + 1,
+    position: i + 10,
     valueMultiplier: i < 3 ? 2 : 1.2,
   })),
 ]
@@ -176,7 +187,7 @@ const generateTeamStickers = () => {
   return stickers
 }
 
-// Main album: 20 FWC (FWC1–FWC20) + 48×20 = 980 stickers
+// Main album: sticker 00 + 20 FWC (FWC1–FWC20) + 48×20 = 981 stickers
 export const ALBUM_STICKERS = [...INTRO_STICKERS, ...generateTeamStickers()]
 export const ALBUM_MAP = Object.fromEntries(ALBUM_STICKERS.map((s) => [s.code, s]))
 export const TOTAL_STICKERS = ALBUM_STICKERS.length // 980

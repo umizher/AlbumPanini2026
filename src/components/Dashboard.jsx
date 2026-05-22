@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TOTAL_STICKERS, TOTAL_FOIL_STICKERS, COCA_COLA_STICKERS } from '../data/album'
 
 function StatCard({ label, value, sub, color = 'text-white', badge }) {
@@ -56,8 +57,19 @@ function MiniProgress({ label, have, total, color = 'bg-emerald-500', icon }) {
   )
 }
 
-export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola }) {
+export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola, clearCollection }) {
   const totalDuplicates = duplicates.reduce((s, d) => s + d.extraQty, 0)
+  const [confirmReset, setConfirmReset] = useState(false)
+
+  const handleReset = () => {
+    if (confirmReset) {
+      clearCollection()
+      setConfirmReset(false)
+    } else {
+      setConfirmReset(true)
+      setTimeout(() => setConfirmReset(false), 4000)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -122,6 +134,16 @@ export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeV
           </p>
         </div>
       )}
+
+      {/* Reset collection */}
+      <div className="flex justify-center pt-2 pb-1">
+        <button
+          onClick={handleReset}
+          className={`text-xs px-4 py-2 rounded-xl transition-colors font-semibold ${confirmReset ? 'bg-red-700 text-white animate-pulse' : 'text-gray-600 hover:text-red-400 bg-gray-900 border border-gray-800'}`}
+        >
+          {confirmReset ? '⚠️ Tap again to confirm reset' : '🗑️ Reset collection'}
+        </button>
+      </div>
 
       {needList.length === 0 && haveAlbum.length === TOTAL_STICKERS && (
         <div className="bg-emerald-950 border border-emerald-800 rounded-2xl p-6 text-center">

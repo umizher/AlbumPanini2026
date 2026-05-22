@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useCollection } from './hooks/useCollection'
-import { getStickerInfo } from './data/album'
+import { getStickerInfo, TOTAL_STICKERS } from './data/album'
 import { getParallel } from './data/parallels'
 import Dashboard from './components/Dashboard'
 import StickerInput from './components/StickerInput'
@@ -104,7 +104,7 @@ export default function App() {
             <span className="text-2xl">⚽</span>
             <div>
               <h1 className="text-base font-black text-white leading-tight">Panini WC 2026</h1>
-              <p className="text-xs text-emerald-500">{completionPct.toFixed(1)}% · {haveAlbum.length}/980</p>
+              <p className="text-xs text-emerald-500">{completionPct.toFixed(1)}% · {haveAlbum.length}/{TOTAL_STICKERS}</p>
             </div>
           </div>
           <button
@@ -128,6 +128,7 @@ export default function App() {
             haveFoil={haveFoil}
             haveCocaCola={haveCocaCola}
             needCocaCola={needCocaCola}
+            clearCollection={clearCollection}
           />
         )}
         {activeTab === 'add' && (
@@ -141,7 +142,12 @@ export default function App() {
           />
         )}
         {activeTab === 'album' && (
-          <AlbumGrid ownedCodes={ownedCodes} state={state} />
+          <AlbumGrid
+            ownedCodes={ownedCodes}
+            state={state}
+            onAdd={handleAdd}
+            onRemove={handleRemove}
+          />
         )}
         {activeTab === 'trade' && (
           <TradeView
