@@ -33,7 +33,7 @@ export default function PackCounter({ totalStickersOwned }) {
   }, [])
 
   const totalPacks = SOURCES.reduce((sum, s) => sum + (packs[s.id] || 0), 0)
-  const totalExpected = totalPacks * 5
+  const totalExpected = totalPacks * 7
   const uniqueRate = totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0
 
   return (
@@ -68,7 +68,7 @@ export default function PackCounter({ totalStickersOwned }) {
             </div>
             <div>
               <p className="text-lg font-bold text-amber-400">{totalExpected}</p>
-              <p className="text-xs text-gray-500">expected stickers</p>
+              <p className="text-xs text-gray-500">expected (×7)</p>
             </div>
             <div>
               <p className="text-lg font-bold text-emerald-400">{uniqueRate}%</p>
