@@ -60,7 +60,6 @@ function MiniProgress({ label, have, total, color = 'bg-emerald-500', icon }) {
 
 export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola, clearCollection, packCount = 0, onPackUpdate }) {
   const totalDuplicates = duplicates.reduce((s, d) => s + d.extraQty, 0)
-  const totalOwned = haveAlbum.length + haveCocaCola.length
   const [confirmReset, setConfirmReset] = useState(false)
 
   const handleReset = () => {
@@ -114,7 +113,7 @@ export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeV
       <PackCounter
         packCount={packCount}
         onPackUpdate={onPackUpdate}
-        totalStickersOwned={totalOwned}
+        totalStickersOwned={haveAlbum.length}
       />
 
       {/* Coca-Cola status */}
