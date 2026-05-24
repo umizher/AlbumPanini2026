@@ -1,59 +1,64 @@
 export const TEAMS = [
-  // CONCACAF (hosts + 3 more)
-  { code: 'USA', name: 'United States', flag: '🇺🇸', confederation: 'CONCACAF' },
-  { code: 'CAN', name: 'Canada', flag: '🇨🇦', confederation: 'CONCACAF' },
-  { code: 'MEX', name: 'Mexico', flag: '🇲🇽', confederation: 'CONCACAF' },
-  { code: 'PAN', name: 'Panama', flag: '🇵🇦', confederation: 'CONCACAF' },
-  { code: 'CRC', name: 'Costa Rica', flag: '🇨🇷', confederation: 'CONCACAF' },
-  { code: 'JAM', name: 'Jamaica', flag: '🇯🇲', confederation: 'CONCACAF' },
-  // CONMEBOL
-  { code: 'BRA', name: 'Brazil', flag: '🇧🇷', confederation: 'CONMEBOL' },
-  { code: 'ARG', name: 'Argentina', flag: '🇦🇷', confederation: 'CONMEBOL' },
-  { code: 'URU', name: 'Uruguay', flag: '🇺🇾', confederation: 'CONMEBOL' },
-  { code: 'COL', name: 'Colombia', flag: '🇨🇴', confederation: 'CONMEBOL' },
-  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨', confederation: 'CONMEBOL' },
-  { code: 'VEN', name: 'Venezuela', flag: '🇻🇪', confederation: 'CONMEBOL' },
-  // UEFA
-  { code: 'FRA', name: 'France', flag: '🇫🇷', confederation: 'UEFA' },
-  { code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', confederation: 'UEFA' },
-  { code: 'ESP', name: 'Spain', flag: '🇪🇸', confederation: 'UEFA' },
-  { code: 'GER', name: 'Germany', flag: '🇩🇪', confederation: 'UEFA' },
-  { code: 'POR', name: 'Portugal', flag: '🇵🇹', confederation: 'UEFA' },
-  { code: 'NED', name: 'Netherlands', flag: '🇳🇱', confederation: 'UEFA' },
-  { code: 'BEL', name: 'Belgium', flag: '🇧🇪', confederation: 'UEFA' },
-  { code: 'ITA', name: 'Italy', flag: '🇮🇹', confederation: 'UEFA' },
-  { code: 'CRO', name: 'Croatia', flag: '🇭🇷', confederation: 'UEFA' },
-  { code: 'POL', name: 'Poland', flag: '🇵🇱', confederation: 'UEFA' },
-  { code: 'SUI', name: 'Switzerland', flag: '🇨🇭', confederation: 'UEFA' },
-  { code: 'DEN', name: 'Denmark', flag: '🇩🇰', confederation: 'UEFA' },
-  { code: 'AUT', name: 'Austria', flag: '🇦🇹', confederation: 'UEFA' },
-  { code: 'SRB', name: 'Serbia', flag: '🇷🇸', confederation: 'UEFA' },
-  { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', confederation: 'UEFA' },
-  { code: 'ROU', name: 'Romania', flag: '🇷🇴', confederation: 'UEFA' },
-  // AFC
-  { code: 'JPN', name: 'Japan', flag: '🇯🇵', confederation: 'AFC' },
-  { code: 'KOR', name: 'South Korea', flag: '🇰🇷', confederation: 'AFC' },
-  { code: 'IRN', name: 'Iran', flag: '🇮🇷', confederation: 'AFC' },
-  { code: 'AUS', name: 'Australia', flag: '🇦🇺', confederation: 'AFC' },
-  { code: 'KSA', name: 'Saudi Arabia', flag: '🇸🇦', confederation: 'AFC' },
-  { code: 'IRQ', name: 'Iraq', flag: '🇮🇶', confederation: 'AFC' },
-  { code: 'JOR', name: 'Jordan', flag: '🇯🇴', confederation: 'AFC' },
-  { code: 'IDN', name: 'Indonesia', flag: '🇮🇩', confederation: 'AFC' },
-  // CAF
-  { code: 'MAR', name: 'Morocco', flag: '🇲🇦', confederation: 'CAF' },
-  { code: 'SEN', name: 'Senegal', flag: '🇸🇳', confederation: 'CAF' },
-  { code: 'EGY', name: 'Egypt', flag: '🇪🇬', confederation: 'CAF' },
-  { code: 'NGA', name: 'Nigeria', flag: '🇳🇬', confederation: 'CAF' },
-  { code: 'ALG', name: 'Algeria', flag: '🇩🇿', confederation: 'CAF' },
-  { code: 'CMR', name: 'Cameroon', flag: '🇨🇲', confederation: 'CAF' },
-  { code: 'RSA', name: 'South Africa', flag: '🇿🇦', confederation: 'CAF' },
-  { code: 'MLI', name: 'Mali', flag: '🇲🇱', confederation: 'CAF' },
-  { code: 'GHA', name: 'Ghana', flag: '🇬🇭', confederation: 'CAF' },
-  // OFC
-  { code: 'NZL', name: 'New Zealand', flag: '🇳🇿', confederation: 'OFC' },
-  // Playoff qualifiers
-  { code: 'UKR', name: 'Ukraine', flag: '🇺🇦', confederation: 'UEFA' },
-  { code: 'PAR', name: 'Paraguay', flag: '🇵🇾', confederation: 'CONMEBOL' },
+  // Group A
+  { code: 'MEX', name: 'Mexico',        flag: '🇲🇽', group: 'A' },
+  { code: 'RSA', name: 'South Africa',  flag: '🇿🇦', group: 'A' },
+  { code: 'KOR', name: 'South Korea',   flag: '🇰🇷', group: 'A' },
+  { code: 'CZE', name: 'Czech Republic',flag: '🇨🇿', group: 'A' },
+  // Group B
+  { code: 'CAN', name: 'Canada',        flag: '🇨🇦', group: 'B' },
+  { code: 'BIH', name: 'Bosnia',        flag: '🇧🇦', group: 'B' },
+  { code: 'QAT', name: 'Qatar',         flag: '🇶🇦', group: 'B' },
+  { code: 'SUI', name: 'Switzerland',   flag: '🇨🇭', group: 'B' },
+  // Group C
+  { code: 'BRA', name: 'Brazil',        flag: '🇧🇷', group: 'C' },
+  { code: 'MAR', name: 'Morocco',       flag: '🇲🇦', group: 'C' },
+  { code: 'HTI', name: 'Haiti',         flag: '🇭🇹', group: 'C' },
+  { code: 'SCO', name: 'Scotland',      flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', group: 'C' },
+  // Group D
+  { code: 'USA', name: 'United States', flag: '🇺🇸', group: 'D' },
+  { code: 'PAR', name: 'Paraguay',      flag: '🇵🇾', group: 'D' },
+  { code: 'AUS', name: 'Australia',     flag: '🇦🇺', group: 'D' },
+  { code: 'TUR', name: 'Turkey',        flag: '🇹🇷', group: 'D' },
+  // Group E
+  { code: 'GER', name: 'Germany',       flag: '🇩🇪', group: 'E' },
+  { code: 'CUW', name: 'Curaçao',       flag: '🇨🇼', group: 'E' },
+  { code: 'CIV', name: "Côte d'Ivoire", flag: '🇨🇮', group: 'E' },
+  { code: 'ECU', name: 'Ecuador',       flag: '🇪🇨', group: 'E' },
+  // Group F
+  { code: 'NED', name: 'Netherlands',   flag: '🇳🇱', group: 'F' },
+  { code: 'JPN', name: 'Japan',         flag: '🇯🇵', group: 'F' },
+  { code: 'SWE', name: 'Sweden',        flag: '🇸🇪', group: 'F' },
+  { code: 'TUN', name: 'Tunisia',       flag: '🇹🇳', group: 'F' },
+  // Group G
+  { code: 'BEL', name: 'Belgium',       flag: '🇧🇪', group: 'G' },
+  { code: 'EGY', name: 'Egypt',         flag: '🇪🇬', group: 'G' },
+  { code: 'IRN', name: 'Iran',          flag: '🇮🇷', group: 'G' },
+  { code: 'NZL', name: 'New Zealand',   flag: '🇳🇿', group: 'G' },
+  // Group H
+  { code: 'ESP', name: 'Spain',         flag: '🇪🇸', group: 'H' },
+  { code: 'CPV', name: 'Cape Verde',    flag: '🇨🇻', group: 'H' },
+  { code: 'KSA', name: 'Saudi Arabia',  flag: '🇸🇦', group: 'H' },
+  { code: 'URU', name: 'Uruguay',       flag: '🇺🇾', group: 'H' },
+  // Group I
+  { code: 'FRA', name: 'France',        flag: '🇫🇷', group: 'I' },
+  { code: 'SEN', name: 'Senegal',       flag: '🇸🇳', group: 'I' },
+  { code: 'IRQ', name: 'Iraq',          flag: '🇮🇶', group: 'I' },
+  { code: 'NOR', name: 'Norway',        flag: '🇳🇴', group: 'I' },
+  // Group J
+  { code: 'ARG', name: 'Argentina',     flag: '🇦🇷', group: 'J' },
+  { code: 'ALG', name: 'Algeria',       flag: '🇩🇿', group: 'J' },
+  { code: 'AUT', name: 'Austria',       flag: '🇦🇹', group: 'J' },
+  { code: 'JOR', name: 'Jordan',        flag: '🇯🇴', group: 'J' },
+  // Group K
+  { code: 'POR', name: 'Portugal',      flag: '🇵🇹', group: 'K' },
+  { code: 'COD', name: 'DR Congo',      flag: '🇨🇩', group: 'K' },
+  { code: 'UZB', name: 'Uzbekistan',    flag: '🇺🇿', group: 'K' },
+  { code: 'COL', name: 'Colombia',      flag: '🇨🇴', group: 'K' },
+  // Group L
+  { code: 'ENG', name: 'England',       flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', group: 'L' },
+  { code: 'CRO', name: 'Croatia',       flag: '🇭🇷', group: 'L' },
+  { code: 'GHA', name: 'Ghana',         flag: '🇬🇭', group: 'L' },
+  { code: 'PAN', name: 'Panama',        flag: '🇵🇦', group: 'L' },
 ]
 
 // Opening stickers — real codes: FWC1–FWC9 (all FOIL)
@@ -178,7 +183,7 @@ const generateTeamStickers = () => {
         teamCode: team.code,
         teamName: team.name,
         flag: team.flag,
-        confederation: team.confederation,
+        group: team.group,
         position: pos,
         valueMultiplier,
       })
@@ -190,13 +195,13 @@ const generateTeamStickers = () => {
 // Main album: sticker 00 + 20 FWC (FWC1–FWC20) + 48×20 = 981 stickers
 export const ALBUM_STICKERS = [...INTRO_STICKERS, ...generateTeamStickers()]
 export const ALBUM_MAP = Object.fromEntries(ALBUM_STICKERS.map((s) => [s.code, s]))
-export const TOTAL_STICKERS = ALBUM_STICKERS.length // 980
+export const TOTAL_STICKERS = ALBUM_STICKERS.length
 
 // All stickers including Coca-Cola exclusives
 export const ALL_STICKERS_MAP = { ...ALBUM_MAP, ...COCA_COLA_MAP }
-export const TOTAL_FOIL_STICKERS = ALBUM_STICKERS.filter((s) => s.isFoil).length // 57
+export const TOTAL_FOIL_STICKERS = ALBUM_STICKERS.filter((s) => s.isFoil).length
 
-export const CONFEDERATION_ORDER = ['CONCACAF', 'CONMEBOL', 'UEFA', 'AFC', 'CAF', 'OFC']
+export const GROUP_ORDER = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
 export const getTeam = (code) => TEAMS.find((t) => t.code === code)
 

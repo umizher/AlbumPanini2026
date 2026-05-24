@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { TEAMS, ALBUM_STICKERS, CONFEDERATION_ORDER, COCA_COLA_STICKERS } from '../data/album'
+import { TEAMS, ALBUM_STICKERS, GROUP_ORDER, COCA_COLA_STICKERS } from '../data/album'
 import { getParallel } from '../data/parallels'
 import TypeSelector from './TypeSelector'
 
@@ -164,11 +164,11 @@ function TeamSection({ team, stickers, ownedCodes, stateStickers, onStickerClick
 export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
-  const [confFilter, setConfFilter] = useState('All')
+  const [groupFilter, setGroupFilter] = useState('All')
   const [activeSticker, setActiveSticker] = useState(null)
   const [pendingTypeSelect, setPendingTypeSelect] = useState(null)
 
-  const confs = ['All', ...CONFEDERATION_ORDER]
+  const groups = ['All', ...GROUP_ORDER]
 
   const teamSections = useMemo(() => TEAMS.map((team) => {
     const stickers = ALBUM_STICKERS.filter((s) => s.teamCode === team.code)
@@ -182,10 +182,10 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
           const entries = Object.values(state.stickers).filter((e) => e.code === s.code)
           return entries.some((e) => e.quantity > 1) || entries.length > 1
         }))
-    const matchesConf = confFilter === 'All' || team.confederation === confFilter
+    const matchesGroup = groupFilter === 'All' || team.group === groupFilter
     const matchesSearch = !search || team.name.toLowerCase().includes(search.toLowerCase()) || team.code.includes(search.toUpperCase())
-    return { team, stickers, matchesFilter, matchesConf, matchesSearch }
-  }).filter((s) => s.matchesFilter && s.matchesConf && s.matchesSearch), [filter, search, confFilter, state.stickers, ownedCodes])
+    return { team, stickers, matchesFilter, matchesGroup, matchesSearch }
+  }).filter((s) => s.matchesFilter && s.matchesGroup && s.matchesSearch), [filter, search, groupFilter, state.stickers, ownedCodes])
 
   const introStickers = useMemo(() => ALBUM_STICKERS.filter((s) => !s.teamCode), [])
 
@@ -233,19 +233,19 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
           </button>
         ))}
         <div className="w-px bg-gray-700" />
-        {confs.map((c) => (
+        {groups.map((g) => (
           <button
-            key={c}
-            onClick={() => setConfFilter(c)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${confFilter === c ? 'bg-blue-700 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+            key={g}
+            onClick={() => setGroupFilter(g)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${groupFilter === g ? 'bg-blue-700 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
           >
-            {c}
+            {g === 'All' ? 'All' : `Grupo ${g}`}
           </button>
         ))}
       </div>
 
       {/* Intro section (FWC + Museum) */}
-      {(filter === 'All' || filter === 'Have' || filter === 'Need') && confFilter === 'All' && !search && (
+      {(filter === 'All' || filter === 'Have' || filter === 'Need') && groupFilter === 'All' && !search && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <p className="font-semibold text-white text-base">🌍 Opening & FIFA Museum</p>
@@ -272,7 +272,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
       )}
 
       {/* Coca-Cola exclusive section */}
-      {(filter === 'All' || filter === 'Have' || filter === 'Need') && confFilter === 'All' && !search && (
+      {(filter === 'All' || filter === 'Have' || filter === 'Need') && groupFilter === 'All' && !search && (
         <div className="bg-red-950/20 border border-red-900/40 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">🥤</span>
