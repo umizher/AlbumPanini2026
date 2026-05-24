@@ -7,6 +7,19 @@ const STORAGE_KEY = 'panini-wc2026-v1'
 export const makeKey = (code, parallelId) => `${code}::${parallelId}`
 
 // MUS1–MUS11 were renamed to FWC10–FWC20 — migrate saved data automatically
+const REMOVED_PARALLEL_IDS = new Set(['bronze_extra', 'silver_extra', 'gold_extra', 'crumpled', 'gold_crumple'])
+const migrateRemovedParallels = (state) => {
+  const hasRemoved = Object.values(state.stickers).some((e) => REMOVED_PARALLEL_IDS.has(e.parallelId))
+  if (!hasRemoved) return state
+  const migrated = {}
+  Object.values(state.stickers).forEach((entry) => {
+    const parallelId = REMOVED_PARALLEL_IDS.has(entry.parallelId) ? 'base' : entry.parallelId
+    const key = makeKey(entry.code, parallelId)
+    migrated[key] = { ...entry, parallelId, key }
+  })
+  return { ...state, stickers: migrated }
+}
+
 const migrateMUStoFWC = (state) => {
   const hasLegacy = Object.values(state.stickers).some((e) => /^MUS\d+$/.test(e.code))
   if (!hasLegacy) return state
@@ -26,7 +39,8 @@ const loadState = () => {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { stickers: {} }
     const state = JSON.parse(raw)
-    const migrated = migrateMUStoFWC(state)
+    let migrated = migrateMUStoFWC(state)
+    migrated = migrateRemovedParallels(migrated)
     if (migrated !== state) saveState(migrated)
     return migrated
   } catch {
@@ -52,7 +66,7 @@ export function useCollection() {
   }, [])
 
   const addSticker = useCallback(
-    (code, parallelId = 'base') => {
+    (code, parallelId = 'base', source = null) => {
       const upper = code.toUpperCase().trim()
       update((prev) => {
         const key = makeKey(upper, parallelId)
@@ -63,13 +77,7 @@ export function useCollection() {
             ...prev.stickers,
             [key]: existing
               ? { ...existing, quantity: existing.quantity + 1 }
-              : {
-                  key,
-                  code: upper,
-                  parallelId,
-                  quantity: 1,
-                  addedAt: Date.now(),
-                },
+              : { key, code: upper, parallelId, quantity: 1, addedAt: Date.now(), source },
           },
         }
       })
