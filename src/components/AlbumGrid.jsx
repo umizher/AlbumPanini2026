@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { TEAMS, ALBUM_STICKERS, CONFEDERATION_ORDER, COCA_COLA_STICKERS } from '../data/album'
 import { getParallel } from '../data/parallels'
 import TypeSelector from './TypeSelector'
@@ -62,7 +62,7 @@ function StickerActionModal({ sticker, stateStickers, onAddSticker, onRemove, on
         <div className={`rounded-xl px-4 py-3 mb-4 ${isOwned ? 'bg-emerald-950/40 border border-emerald-800' : 'bg-gray-800 border border-gray-700'}`}>
           {isOwned ? (
             <div>
-              <p className="text-xs text-emerald-400 font-semibold mb-1">In your collection ({totalQty} total)</p>
+              <p className="text-sm text-emerald-400 font-semibold mb-1">In your collection ({totalQty} total)</p>
               <div className="flex flex-wrap gap-1.5">
                 {entries.map((e) => {
                   const p = getParallel(e.parallelId)
@@ -75,7 +75,7 @@ function StickerActionModal({ sticker, stateStickers, onAddSticker, onRemove, on
               </div>
             </div>
           ) : (
-            <p className="text-xs text-gray-500">Not in your collection yet</p>
+            <p className="text-sm text-gray-500">Not in your collection yet</p>
           )}
         </div>
 
@@ -87,8 +87,8 @@ function StickerActionModal({ sticker, stateStickers, onAddSticker, onRemove, on
           >
             <span className="text-xl">➕</span>
             <div>
-              <p className="font-semibold text-white text-sm">Add this sticker</p>
-              <p className="text-xs text-emerald-300">Select parallel type and paste or trade</p>
+              <p className="font-semibold text-white text-base">Add this sticker</p>
+              <p className="text-sm text-emerald-300">Select parallel type and paste or trade</p>
             </div>
           </button>
 
@@ -102,8 +102,8 @@ function StickerActionModal({ sticker, stateStickers, onAddSticker, onRemove, on
               >
                 <span className="text-xl">{p.emoji}</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-white text-sm">Remove {p.name}</p>
-                  <p className="text-xs text-gray-400">{entry.quantity} in collection — removes one</p>
+                  <p className="font-semibold text-white text-base">Remove {p.name}</p>
+                  <p className="text-sm text-gray-400">{entry.quantity} in collection — removes one</p>
                 </div>
                 <span className="text-red-500 text-lg">−</span>
               </button>
@@ -135,12 +135,12 @@ function TeamSection({ team, stickers, ownedCodes, stateStickers, onStickerClick
       <div className="flex items-center gap-3 mb-3">
         <span className="text-2xl">{team.flag}</span>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-white text-sm truncate">{team.name}</p>
+          <p className="font-semibold text-white text-base truncate">{team.name}</p>
           <div className="flex items-center gap-2 mt-0.5">
             <div className="flex-1 bg-gray-800 rounded-full h-1.5">
               <div className="bg-emerald-500 h-1.5 rounded-full transition-all" style={{ width: `${pct}%` }} />
             </div>
-            <span className="text-xs text-gray-500 whitespace-nowrap">{have}/{stickers.length}</span>
+            <span className="text-sm text-gray-500 whitespace-nowrap">{have}/{stickers.length}</span>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
 
   const confs = ['All', ...CONFEDERATION_ORDER]
 
-  const teamSections = TEAMS.map((team) => {
+  const teamSections = useMemo(() => TEAMS.map((team) => {
     const stickers = ALBUM_STICKERS.filter((s) => s.teamCode === team.code)
     const have = stickers.filter((s) => ownedCodes.has(s.code)).length
     const matchesFilter =
@@ -187,9 +187,9 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
     const matchesConf = confFilter === 'All' || team.confederation === confFilter
     const matchesSearch = !search || team.name.toLowerCase().includes(search.toLowerCase()) || team.code.includes(search.toUpperCase())
     return { team, stickers, matchesFilter, matchesConf, matchesSearch }
-  }).filter((s) => s.matchesFilter && s.matchesConf && s.matchesSearch)
+  }).filter((s) => s.matchesFilter && s.matchesConf && s.matchesSearch), [filter, search, confFilter, state.stickers, ownedCodes])
 
-  const introStickers = ALBUM_STICKERS.filter((s) => !s.teamCode)
+  const introStickers = useMemo(() => ALBUM_STICKERS.filter((s) => !s.teamCode), [])
 
   const getIntroOwnership = (code) => {
     const entries = Object.values(state.stickers).filter((e) => e.code === code)
@@ -266,7 +266,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
       {(filter === 'All' || filter === 'Have' || filter === 'Need') && confFilter === 'All' && !search && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <p className="font-semibold text-white text-sm">🌍 Opening & FIFA Museum</p>
+            <p className="font-semibold text-white text-base">🌍 Opening & FIFA Museum</p>
             <span className="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">00 · FWC1–FWC20</span>
           </div>
           <div className="flex flex-wrap gap-1">
@@ -294,10 +294,10 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
         <div className="bg-red-950/20 border border-red-900/40 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">🥤</span>
-            <p className="font-semibold text-white text-sm">Coca-Cola Exclusives</p>
+            <p className="font-semibold text-white text-base">Coca-Cola Exclusives</p>
             <span className="text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full ml-1">CC1–CC12</span>
           </div>
-          <p className="text-[10px] text-red-400/70 mb-3">Only from Coca-Cola 20oz bottles · Not in standard packs</p>
+          <p className="text-sm text-red-400/70 mb-3">Only from Coca-Cola 20oz bottles · Not in standard packs</p>
           <div className="flex flex-wrap gap-1">
             {COCA_COLA_STICKERS.map((s) => {
               const entries = Object.values(state.stickers).filter((e) => e.code === s.code)
@@ -315,7 +315,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
               const entries = Object.values(state.stickers).filter((e) => e.code === s.code)
               const have = entries.length > 0
               return (
-                <div key={s.code} className={`flex items-center gap-2 text-xs px-2 py-1 rounded-lg ${have ? 'bg-red-900/30 text-red-300' : 'text-gray-600'}`}>
+                <div key={s.code} className={`flex items-center gap-2 text-sm px-2 py-1 rounded-lg ${have ? 'bg-red-900/30 text-red-300' : 'text-gray-600'}`}>
                   <span>{s.flag}</span>
                   <span className="font-mono text-[10px] text-red-400/70">{s.code}</span>
                   <span className="truncate">{s.player}</span>

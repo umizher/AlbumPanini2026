@@ -9,12 +9,12 @@ export default function TypeSelector({ code, onSelect, onCancel, progress }) {
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest">
+            <p className="text-sm text-gray-400 uppercase tracking-widest">
               {progress ? `Sticker ${progress}` : 'Adding sticker'}
             </p>
             <h2 className="text-xl font-bold text-white">{code}</h2>
             {progress && (
-              <p className="text-xs text-emerald-400 mt-0.5">
+              <p className="text-sm text-emerald-400 mt-0.5">
                 Select parallel type for each sticker
               </p>
             )}
@@ -22,7 +22,7 @@ export default function TypeSelector({ code, onSelect, onCancel, progress }) {
           <button onClick={onCancel} className="text-gray-400 hover:text-white text-2xl leading-none">✕</button>
         </div>
 
-        <p className="text-sm text-gray-400 mb-3">Select parallel type:</p>
+        <p className="text-base text-gray-400 mb-3">Select parallel type:</p>
 
         <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto pr-1">
           {PARALLEL_LIST.map((p) => (
@@ -34,13 +34,15 @@ export default function TypeSelector({ code, onSelect, onCancel, progress }) {
               <span className="text-2xl">{p.emoji}</span>
               <div className="min-w-0">
                 <p className="font-semibold text-white text-sm leading-tight">{p.name}</p>
-                <p className="text-xs text-gray-400 truncate">{p.rarity} · ×{p.multiplier}</p>
+                <p className="text-sm text-gray-400 truncate">{p.rarity} · ×{p.multiplier}</p>
+                {p.multiplier >= 20 && <span className="text-[10px] text-yellow-300 font-bold">💎 Ultra Rare</span>}
+                {p.multiplier >= 8 && p.multiplier < 20 && <span className="text-[10px] text-orange-300 font-bold">🔥 High Value</span>}
               </div>
             </button>
           ))}
         </div>
 
-        <p className="text-xs text-gray-500 mt-3 text-center">
+        <p className="text-sm text-gray-500 mt-3 text-center">
           Multiplier = exchange value relative to 1 base sticker
         </p>
       </div>

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { getStickerInfo, ALBUM_MAP, COCA_COLA_MAP } from '../data/album'
 import { getParallel } from '../data/parallels'
+import { makeKey } from '../hooks/useCollection'
 import TypeSelector from './TypeSelector'
 import PasteOrTradeModal from './PasteOrTradeModal'
 
@@ -10,7 +11,7 @@ function ParallelPicker({ code, entries, onSelect, onCancel }) {
       <div className="w-full max-w-lg bg-gray-900 rounded-t-2xl sm:rounded-2xl p-5 animate-slide-up" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest">Remove which variant?</p>
+            <p className="text-sm text-gray-400 uppercase tracking-widest">Remove which variant?</p>
             <h2 className="text-xl font-bold text-white">{code}</h2>
           </div>
           <button onClick={onCancel} className="text-gray-400 hover:text-white text-2xl leading-none">✕</button>
@@ -27,7 +28,7 @@ function ParallelPicker({ code, entries, onSelect, onCancel }) {
                 <span className="text-2xl">{p.emoji}</span>
                 <div>
                   <p className="font-semibold text-white">{p.name}</p>
-                  <p className="text-xs text-gray-400">{p.rarity} · ×{p.multiplier} · {entry.quantity} owned</p>
+                  <p className="text-sm text-gray-400">{p.rarity} · ×{p.multiplier} · {entry.quantity} owned</p>
                 </div>
               </button>
             )
@@ -168,7 +169,7 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
       {externalPending && !isRemove && (
         <div className="bg-blue-950/50 border border-blue-900 rounded-xl p-3 text-xs text-blue-300 flex items-center gap-2">
           <span>⏳</span>
-          <span>Select the parallel type in the panel above to add the sticker from your wishlist.</span>
+          <span className="text-sm">Select the parallel type in the panel above to add the sticker from your wishlist.</span>
         </div>
       )}
 
@@ -198,12 +199,12 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
           {/* Info tag */}
           {upper.length > 0 && !isRemove && (
             isBatch ? (
-              <div className="text-xs px-3 py-2 rounded-lg flex items-center gap-2 bg-emerald-950 text-emerald-400">
+              <div className="text-sm px-3 py-2 rounded-lg flex items-center gap-2 bg-emerald-950 text-emerald-400">
                 <span>📦</span>
                 <span>{rawCodes.length} stickers: {rawCodes.join(', ')}</span>
               </div>
             ) : info && primaryCode.length > 0 ? (
-              <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+              <div className={`text-sm px-3 py-2 rounded-lg flex items-center gap-2 ${
                 isKnownCC ? 'bg-red-950 text-red-300'
                 : isKnownAlbum ? 'bg-emerald-950 text-emerald-400'
                 : 'bg-amber-950 text-amber-400'
@@ -221,7 +222,7 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
           )}
           {/* Remove info tag */}
           {upper.length > 0 && isRemove && info && (
-            <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${
+            <div className={`text-sm px-3 py-2 rounded-lg flex items-center gap-2 ${
               isOwned ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-500'
             }`}>
               <span>{isOwned ? '🗑️' : '✕'}</span>
@@ -246,18 +247,18 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
       {/* Recently added */}
       {!isRemove && recentlyAdded.length > 0 && (
         <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
-          <h3 className="text-sm font-semibold text-gray-400 mb-3">Recently Added</h3>
+          <h3 className="text-base font-semibold text-gray-400 mb-3">Recently Added</h3>
           <div className="flex flex-col gap-2">
             {recentlyAdded.slice(0, 8).map(({ code: c, parallelId, parallel, info: si, addedAt }, i) => (
               <div key={`${c}-${addedAt}-${i}`} className="flex items-center gap-3 animate-pop">
                 <span className="text-lg">{parallel.emoji}</span>
                 <div className="flex-1 min-w-0">
-                  <span className="font-mono font-bold text-white text-sm">{c}</span>
-                  <span className="text-gray-500 text-xs ml-2">{si?.section}</span>
+                  <span className="font-mono font-bold text-white text-base">{c}</span>
+                  <span className="text-gray-500 text-sm ml-2">{si?.section}</span>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${parallel.bg} text-white`}>{parallel.name}</span>
+                <span className={`text-sm px-2 py-0.5 rounded-full ${parallel.bg} text-white`}>{parallel.name}</span>
                 <button
-                  onClick={() => onRemove(`${c}::${parallelId}`, c)}
+                  onClick={() => onRemove(makeKey(c, parallelId), c)}
                   className="text-gray-600 hover:text-red-400 transition-colors text-base leading-none px-1 flex-shrink-0"
                   title="Undo"
                 >↩</button>

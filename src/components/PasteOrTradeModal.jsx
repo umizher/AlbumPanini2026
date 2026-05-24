@@ -9,18 +9,32 @@ export default function PasteOrTradeModal({ code, parallelId, onPaste, onTrade, 
       <div className="w-full max-w-lg bg-gray-900 rounded-t-2xl sm:rounded-2xl p-5 animate-slide-up" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest">New sticker</p>
+            <p className="text-sm text-gray-400 uppercase tracking-widest">Got a new sticker!</p>
             <h2 className="text-xl font-bold text-white">{code}</h2>
           </div>
           <button onClick={onCancel} className="text-gray-400 hover:text-white text-2xl leading-none">✕</button>
         </div>
-        <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center gap-2 mb-4">
           <span className="text-lg">{parallel.emoji}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${parallel.bg} text-white`}>{parallel.name}</span>
-          {info?.title && <span className="text-xs text-gray-400 truncate">{info.title}</span>}
+          <span className={`text-sm px-2 py-0.5 rounded-full ${parallel.bg} text-white`}>{parallel.name}</span>
+          {info?.title && <span className="text-sm text-gray-400 truncate">{info.title}</span>}
         </div>
 
-        <p className="text-sm font-semibold text-gray-300 mb-3">What do you want to do with this sticker?</p>
+        {parallel.multiplier >= 8 && (
+          <div className="mb-4 bg-orange-950/50 border border-orange-700 rounded-xl px-4 py-2.5 flex items-center gap-2">
+            <span className="text-xl">{parallel.multiplier >= 20 ? '💎' : '🔥'}</span>
+            <div>
+              <p className="text-sm font-bold text-orange-300">
+                {parallel.multiplier >= 20 ? 'Ultra Rare!' : 'High Value Parallel!'}
+              </p>
+              <p className="text-xs text-orange-400/80">
+                Worth {parallel.multiplier}× a base sticker — check eBay before trading
+              </p>
+            </div>
+          </div>
+        )}
+
+        <p className="text-base font-semibold text-gray-300 mb-3">Is this for your album or for trading?</p>
 
         <div className="flex flex-col gap-3">
           <button
@@ -29,8 +43,8 @@ export default function PasteOrTradeModal({ code, parallelId, onPaste, onTrade, 
           >
             <span className="text-2xl">📌</span>
             <div>
-              <p className="font-semibold text-white">Paste in album</p>
-              <p className="text-xs text-gray-400">It's new — I need this one for my album</p>
+              <p className="font-semibold text-white text-base">Paste in album</p>
+              <p className="text-sm text-gray-400">I need this one — adding it to my album</p>
             </div>
           </button>
 
@@ -40,8 +54,8 @@ export default function PasteOrTradeModal({ code, parallelId, onPaste, onTrade, 
           >
             <span className="text-2xl">🔄</span>
             <div>
-              <p className="font-semibold text-white">Set for trade</p>
-              <p className="text-xs text-gray-400">Already have it pasted — this one's for exchange</p>
+              <p className="font-semibold text-white text-base">Set for trade</p>
+              <p className="text-sm text-gray-400">I already have this one — keep it for trading</p>
             </div>
           </button>
         </div>

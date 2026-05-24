@@ -4,6 +4,8 @@ import { getParallel } from '../data/parallels'
 
 const STORAGE_KEY = 'panini-wc2026-v1'
 
+export const makeKey = (code, parallelId) => `${code}::${parallelId}`
+
 // MUS1–MUS11 were renamed to FWC10–FWC20 — migrate saved data automatically
 const migrateMUStoFWC = (state) => {
   const hasLegacy = Object.values(state.stickers).some((e) => /^MUS\d+$/.test(e.code))
@@ -53,7 +55,7 @@ export function useCollection() {
     (code, parallelId = 'base') => {
       const upper = code.toUpperCase().trim()
       update((prev) => {
-        const key = `${upper}::${parallelId}`
+        const key = makeKey(upper, parallelId)
         const existing = prev.stickers[key]
         return {
           ...prev,

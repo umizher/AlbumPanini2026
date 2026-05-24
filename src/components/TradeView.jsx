@@ -3,30 +3,35 @@ import { exportTradeList, copyToClipboard, formatTradeListText } from '../utils/
 import RecordTrade from './RecordTrade'
 
 function TradeCard({ item, onRemoveOne }) {
-  const searchUrl = `https://www.google.com/search?q=panini+world+cup+2026+${item.code}+${encodeURIComponent(item.info.title)}+precio+intercambio`
+  const ebayBase = `panini world cup 2026 ${item.code} ${item.info?.title ?? ''}`
+  const ebaySoldUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(ebayBase)}&LH_Sold=1&LH_Complete=1`
+  const ebayActiveUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(ebayBase)}`
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-3">
       <span className="text-2xl">{item.parallel.emoji}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-mono font-bold text-white">{item.code}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${item.parallel.bg} text-white`}>
+          <span className="font-mono font-bold text-white text-base">{item.code}</span>
+          <span className={`text-sm px-2 py-0.5 rounded-full ${item.parallel.bg} text-white`}>
             {item.parallel.name}
           </span>
         </div>
-        <p className="text-xs text-gray-400 truncate">{item.info.section} · {item.info.title}</p>
+        <p className="text-sm text-gray-400 truncate">{item.info.section} · {item.info.title}</p>
         <div className="flex items-center gap-3 mt-1">
-          <span className="text-xs text-amber-400">×{item.extraQty} extra</span>
-          <span className="text-xs text-blue-400 font-semibold">= {item.exchangeValue} base stickers</span>
+          <span className="text-sm text-amber-400">×{item.extraQty} extra</span>
+          <span className="text-sm text-blue-400 font-semibold">= {item.exchangeValue} base stickers</span>
         </div>
       </div>
-      <a
-        href={searchUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-600 hover:text-blue-400 text-base p-1 transition-colors"
-        title="Search market value on Google"
-      >🔍</a>
+      <div className="flex flex-col gap-1">
+        <a href={ebaySoldUrl} target="_blank" rel="noopener noreferrer"
+           className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-blue-900/50 text-blue-300 hover:bg-blue-800 whitespace-nowrap text-center">
+          💰 Sold
+        </a>
+        <a href={ebayActiveUrl} target="_blank" rel="noopener noreferrer"
+           className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 whitespace-nowrap text-center">
+          🛒 Active
+        </a>
+      </div>
       <button
         onClick={() => onRemoveOne(item.key, item.code)}
         className="text-gray-600 hover:text-red-400 text-lg p-1 transition-colors"
@@ -52,8 +57,8 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne, addS
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
         <p className="text-5xl">🔄</p>
-        <p className="text-gray-400 font-semibold">No duplicates yet</p>
-        <p className="text-gray-600 text-sm">Add the same sticker twice to see it here</p>
+        <p className="text-gray-400 font-semibold text-base">No duplicates yet</p>
+        <p className="text-gray-600 text-base">Add the same sticker twice to see it here</p>
       </div>
     )
   }
@@ -64,13 +69,13 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne, addS
       <div className="bg-blue-950/50 border border-blue-900 rounded-2xl p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-blue-400 uppercase tracking-wider mb-1">Total Trade Value</p>
+            <p className="text-sm text-blue-400 uppercase tracking-wider mb-1">Total Trade Value</p>
             <p className="text-3xl font-black text-white">{totalTradeValue}</p>
-            <p className="text-xs text-blue-400">base sticker units</p>
+            <p className="text-sm text-blue-400">base sticker units</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400 mb-1">{duplicates.length} duplicate entries</p>
-            <p className="text-xs text-gray-500">Sorted highest value first</p>
+            <p className="text-sm text-gray-400 mb-1">{duplicates.length} duplicate entries</p>
+            <p className="text-sm text-gray-500">Sorted highest value first</p>
           </div>
         </div>
       </div>
@@ -85,7 +90,7 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne, addS
 
       {/* Trade calculator hint */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Exchange Rate Guide</p>
+        <p className="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-2">Exchange Rate Guide</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           {[
             ['1 Blue', '3 Base'],
@@ -95,7 +100,7 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne, addS
             ['1 Green', '10 Base'],
             ['1 Black', '20 Base'],
           ].map(([a, b]) => (
-            <div key={a} className="flex justify-between text-xs">
+            <div key={a} className="flex justify-between text-sm">
               <span className="text-gray-300">{a}</span>
               <span className="text-gray-500">=</span>
               <span className="text-emerald-400">{b}</span>

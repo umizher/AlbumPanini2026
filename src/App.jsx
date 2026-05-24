@@ -64,17 +64,30 @@ export default function App() {
       const info = getStickerInfo(code)
       const parallel = getParallel(parallelId)
       setRecentlyAdded((prev) => [{ code, parallelId, parallel, info, addedAt: Date.now() }, ...prev.slice(0, 19)])
-      showToast(`${code} added (${parallel.name})`)
+      if (parallel.multiplier >= 20) {
+        showToast(`💎 ${code} — Ultra Rare ${parallel.name}! Check eBay price`, 'success')
+      } else if (parallel.multiplier >= 8) {
+        showToast(`🔥 ${code} added — High Value ${parallel.name}! Worth ${parallel.multiplier}× base`, 'success')
+      } else {
+        showToast(`${code} added (${parallel.name})`)
+      }
     },
     [addSticker, showToast]
   )
 
   const handleRemove = useCallback(
     (key, label) => {
+      const [code, parallelId] = key.split('::')
       removeOne(key)
-      if (label) showToast(`${label} removed`, 'info')
+      if (label) {
+        setToast({
+          message: `${label} removed`,
+          type: 'info',
+          onUndo: () => addSticker(code, parallelId || 'base'),
+        })
+      }
     },
-    [removeOne, showToast]
+    [removeOne, addSticker]
   )
 
   const handleAddFromNeed = useCallback((code) => {
@@ -95,7 +108,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
       {/* Toast */}
-      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} />}
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} onUndo={toast.onUndo} />}
 
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-950/90 backdrop-blur border-b border-gray-800 px-4 py-3">
@@ -186,7 +199,7 @@ export default function App() {
               }`}
             >
               <span className="text-lg leading-none">{tab.icon}</span>
-              <span className="text-[10px] font-semibold">{tab.label}</span>
+              <span className="text-xs font-semibold">{tab.label}</span>
             </button>
           ))}
         </div>
