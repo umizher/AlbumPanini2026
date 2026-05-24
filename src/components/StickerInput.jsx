@@ -3,10 +3,6 @@ import { getStickerInfo, ALBUM_MAP, COCA_COLA_MAP } from '../data/album'
 import { getParallel } from '../data/parallels'
 import { makeKey } from '../hooks/useCollection'
 import TypeSelector from './TypeSelector'
-import PasteOrTradeModal from './PasteOrTradeModal'
-import SourcePicker, { SOURCES } from './SourcePicker'
-
-const STORE_SOURCES = SOURCES.filter((s) => s.id !== 'trade')
 
 function ParallelPicker({ code, entries, onSelect, onCancel }) {
   return (
@@ -45,60 +41,37 @@ function ParallelPicker({ code, entries, onSelect, onCancel }) {
 export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], state, externalPending = false, onToast, onPackUpdate }) {
   const [code, setCode] = useState('')
   const [mode, setMode] = useState('add') // 'add' | 'pack' | 'remove'
-
-  // Shared batch processing
   const [batch, setBatch] = useState(null)
-  const [batchSource, setBatchSource] = useState(null)
-  const [pendingIntent, setPendingIntent] = useState(null)
   const [pendingRemoveEntries, setPendingRemoveEntries] = useState(null)
 
-  // Source memory (persists across mode switches)
-  const [lastSource, setLastSource] = useState(null)
-
-  // Add mode: SourcePicker modal after submit
-  const [pendingSource, setPendingSource] = useState(false)
-
-  // Pack mode phases: 'source' | 'input'
-  const [packPhase, setPackPhase] = useState('source')
-  const [packSource, setPackSource] = useState(null)
-
-  // Pack stats tracked via ref to avoid stale closure issues
   const packStatsRef = useRef({ news: 0, dupes: 0 })
-
   const inputRef = useRef(null)
   const packInputRef = useRef(null)
 
-  const getSourceMeta = (id) => SOURCES.find((s) => s.id === id)
-
-  // ── Queue advancement — handles end-of-batch for both modes ──
+  // ── Queue advancement ──
   const advanceQueue = (queue, total) => {
     if (queue.length > 0) {
       setBatch({ queue, total })
     } else {
       setBatch(null)
       if (mode === 'pack') {
-        const src = getSourceMeta(packSource)
         const { news, dupes } = packStatsRef.current
         onToast?.(
-          `📦 ${src?.label ?? 'Sobre'} · ${news} nueva${news !== 1 ? 's' : ''} · ${dupes} repetida${dupes !== 1 ? 's' : ''}`,
+          `📦 Sobre · ${news} nueva${news !== 1 ? 's' : ''} · ${dupes} repetida${dupes !== 1 ? 's' : ''}`,
           'success'
         )
-        setPackPhase('source')
-        setPackSource(null)
+        setTimeout(() => packInputRef.current?.focus(), 100)
       } else {
         setTimeout(() => inputRef.current?.focus(), 100)
       }
     }
   }
 
-  // ── Mode switch — resets all transient state ──
+  // ── Mode switch ──
   const switchMode = (newMode) => {
     setMode(newMode)
     setCode('')
     setBatch(null)
-    setPendingSource(false)
-    setPendingIntent(null)
-    if (newMode === 'pack') setPackPhase('source')
   }
 
   // ── REMOVE mode ──
@@ -123,25 +96,10 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
     const codes = raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
     if (codes.length === 0) return
     setBatch({ queue: codes, total: codes.length })
-    setPendingSource(true)
     setCode('')
   }
 
-  const handleAddSourceSelect = (source) => {
-    setBatchSource(source)
-    setLastSource(source)
-    setPendingSource(false)
-  }
-
   // ── PACK mode ──
-  const handlePackSourceSelect = (sourceId) => {
-    setPackSource(sourceId)
-    setLastSource(sourceId)
-    onPackUpdate?.(sourceId, 1) // always +1 pack, no question asked
-    setPackPhase('input')
-    setTimeout(() => packInputRef.current?.focus(), 100)
-  }
-
   const handlePackSubmit = (e) => {
     e.preventDefault()
     const raw = code.trim().toUpperCase()
@@ -149,48 +107,21 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
     const codes = raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
     if (codes.length === 0) return
     packStatsRef.current = { news: 0, dupes: 0 }
-    setBatchSource(packSource)
+    onPackUpdate?.(1)
     setBatch({ queue: codes, total: codes.length })
     setCode('')
   }
 
-  // ── Shared batch/intent handlers ──
+  // ── Shared batch handler ──
   const handleBatchSelect = (parallelId) => {
     const currentCode = batch.queue[0]
     const remaining = batch.queue.slice(1)
     const isAlreadyOwned = Object.values(state.stickers).some((e) => e.code === currentCode)
-    const source = batchSource
-
-    if (isAlreadyOwned) {
-      packStatsRef.current.dupes++
-      onAdd(currentCode, parallelId, source)
-      advanceQueue(remaining, batch.total)
-    } else {
-      packStatsRef.current.news++
-      setBatch(null)
-      setPendingIntent({ code: currentCode, parallelId, queue: remaining, total: batch.total, source })
+    if (mode === 'pack') {
+      if (isAlreadyOwned) { packStatsRef.current.dupes++ } else { packStatsRef.current.news++ }
     }
-  }
-
-  const handlePaste = () => {
-    const { code: c, parallelId, queue, total, source } = pendingIntent
-    onAdd(c, parallelId, source)
-    setPendingIntent(null)
-    advanceQueue(queue, total)
-  }
-
-  const handleTrade = () => {
-    const { code: c, parallelId, queue, total, source } = pendingIntent
-    onAdd(c, parallelId, source)
-    onAdd(c, parallelId, source)
-    setPendingIntent(null)
-    advanceQueue(queue, total)
-  }
-
-  const handleCancelIntent = () => {
-    const { queue, total } = pendingIntent
-    setPendingIntent(null)
-    advanceQueue(queue, total)
+    onAdd(currentCode, parallelId)
+    advanceQueue(remaining, batch.total)
   }
 
   const handleRemoveEntry = (entry) => {
@@ -240,88 +171,44 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
       </div>
 
       {/* ── PACK MODE ── */}
-      {mode === 'pack' && (
-        <>
-          {/* Phase: source selection (inline, no modal) */}
-          {packPhase === 'source' && (
-            <div className="bg-gray-900 border border-blue-900/50 rounded-2xl p-5">
-              <p className="text-sm text-gray-400 uppercase tracking-wider mb-3 font-semibold">📦 Abrir sobre — ¿De dónde?</p>
-              <div className="flex flex-col gap-2">
-                {STORE_SOURCES.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handlePackSourceSelect(s.id)}
-                    className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all active:scale-[0.98] text-left ${
-                      lastSource === s.id
-                        ? `${s.border} ${s.bg}`
-                        : 'border-gray-700 bg-gray-800 hover:border-gray-500'
-                    }`}
-                  >
-                    <span className="text-2xl">{s.icon}</span>
-                    <span className="font-semibold text-white text-base flex-1">{s.label}</span>
-                    {lastSource === s.id
-                      ? <span className="text-xs text-gray-400 bg-gray-700 px-2 py-0.5 rounded-full">Última usada</span>
-                      : null}
-                  </button>
-                ))}
-              </div>
+      {mode === 'pack' && !batch && (
+        <div className="bg-gray-900 border border-blue-900/50 rounded-2xl p-5">
+          <p className="text-sm text-gray-400 uppercase tracking-wider mb-4 font-semibold">📦 Abrir sobre</p>
+          <form onSubmit={handlePackSubmit} className="flex flex-col gap-3">
+            <div className="relative">
+              <input
+                ref={packInputRef}
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="BRA5 MEX3 ARG1 FWC2 … (7 códigos)"
+                className="w-full bg-gray-800 border-2 border-blue-900 focus:border-blue-500 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-gray-600 outline-none transition-colors uppercase"
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+              />
+              {code && (
+                <button type="button" onClick={() => setCode('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg">✕</button>
+              )}
             </div>
-          )}
 
-          {/* Phase: code input (only shown when no batch or intent active) */}
-          {packPhase === 'input' && !batch && !pendingIntent && (
-            <div className="bg-gray-900 border border-blue-900/50 rounded-2xl p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{getSourceMeta(packSource)?.icon}</span>
-                <div className="flex-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest">Sobre abierto · +1 al contador</p>
-                  <p className="text-base font-bold text-white">{getSourceMeta(packSource)?.label}</p>
-                </div>
-                <button
-                  onClick={() => { setPackPhase('source'); setPackSource(null) }}
-                  className="text-xs text-gray-500 hover:text-gray-300 underline"
-                >
-                  Cambiar
-                </button>
+            {rawCodes.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-950/40 rounded-lg">
+                <span className="text-blue-400 font-bold text-base">{rawCodes.length}</span>
+                <span className="text-blue-300 text-sm">código{rawCodes.length !== 1 ? 's' : ''} ingresado{rawCodes.length !== 1 ? 's' : ''}</span>
+                {rawCodes.length === 7 && <span className="ml-auto text-emerald-400 text-sm font-semibold">✓ Sobre completo</span>}
               </div>
+            )}
 
-              <form onSubmit={handlePackSubmit} className="flex flex-col gap-3">
-                <div className="relative">
-                  <input
-                    ref={packInputRef}
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="BRA5 MEX3 ARG1 FWC2 … (7 códigos)"
-                    className="w-full bg-gray-800 border-2 border-blue-900 focus:border-blue-500 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-gray-600 outline-none transition-colors uppercase"
-                    autoComplete="off"
-                    autoCapitalize="characters"
-                    spellCheck={false}
-                  />
-                  {code && (
-                    <button type="button" onClick={() => setCode('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg">✕</button>
-                  )}
-                </div>
-
-                {rawCodes.length > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-950/40 rounded-lg">
-                    <span className="text-blue-400 font-bold text-base">{rawCodes.length}</span>
-                    <span className="text-blue-300 text-sm">código{rawCodes.length !== 1 ? 's' : ''} ingresado{rawCodes.length !== 1 ? 's' : ''}</span>
-                    {rawCodes.length === 7 && <span className="ml-auto text-emerald-400 text-sm font-semibold">✓ Sobre completo</span>}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={rawCodes.length === 0}
-                  className="w-full disabled:bg-gray-700 disabled:text-gray-500 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-colors text-base active:scale-95"
-                >
-                  {rawCodes.length > 0 ? `Procesar ${rawCodes.length} baraja${rawCodes.length !== 1 ? 's' : ''} →` : 'Ingresa los códigos arriba'}
-                </button>
-              </form>
-            </div>
-          )}
-        </>
+            <button
+              type="submit"
+              disabled={rawCodes.length === 0}
+              className="w-full disabled:bg-gray-700 disabled:text-gray-500 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-colors text-base active:scale-95"
+            >
+              {rawCodes.length > 0 ? `Procesar ${rawCodes.length} baraja${rawCodes.length !== 1 ? 's' : ''} →` : 'Ingresa los códigos arriba'}
+            </button>
+          </form>
+        </div>
       )}
 
       {/* ── ADD MODE ── */}
@@ -425,7 +312,7 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
       )}
 
       {/* ── Recently added (add + pack modes) ── */}
-      {mode !== 'remove' && recentlyAdded.length > 0 && (
+      {mode !== 'remove' && recentlyAdded.length > 0 && !batch && (
         <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
           <h3 className="text-base font-semibold text-gray-400 mb-3">Recién Agregadas</h3>
           <div className="flex flex-col gap-2">
@@ -448,33 +335,13 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
         </div>
       )}
 
-      {/* ── SourcePicker modal (add mode only, after submit) ── */}
-      {batch && pendingSource && !externalPending && (
-        <SourcePicker
-          defaultSource={lastSource}
-          onSelect={handleAddSourceSelect}
-          onCancel={() => { setBatch(null); setCode(''); setPendingSource(false); setTimeout(() => inputRef.current?.focus(), 100) }}
-        />
-      )}
-
-      {/* ── TypeSelector (shared for add + pack processing) ── */}
-      {batch && !pendingSource && !externalPending && (
+      {/* ── TypeSelector (shared for add + pack) ── */}
+      {batch && !externalPending && (
         <TypeSelector
           code={batch.queue[0]}
           progress={batch.total > 1 ? `${batch.total - batch.queue.length + 1} de ${batch.total}` : null}
           onSelect={handleBatchSelect}
           onCancel={() => { setBatch(null); setCode('') }}
-        />
-      )}
-
-      {/* ── PasteOrTradeModal ── */}
-      {pendingIntent && (
-        <PasteOrTradeModal
-          code={pendingIntent.code}
-          parallelId={pendingIntent.parallelId}
-          onPaste={handlePaste}
-          onTrade={handleTrade}
-          onCancel={handleCancelIntent}
         />
       )}
 

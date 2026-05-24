@@ -58,52 +58,7 @@ function MiniProgress({ label, have, total, color = 'bg-emerald-500', icon }) {
   )
 }
 
-const SOURCE_META = {
-  walgreens: { label: 'Walgreens', icon: '🏪' },
-  costco: { label: 'Costco', icon: '🏬' },
-  amazon: { label: 'Amazon', icon: '📦' },
-  other: { label: 'Otro', icon: '🎴' },
-  trade: { label: 'Intercambio', icon: '🤝' },
-}
-
-function SourceBreakdown({ entries }) {
-  const bySource = {}
-  entries.forEach((e) => {
-    if (!e.source) return
-    if (!bySource[e.source]) bySource[e.source] = { total: 0, codes: new Set() }
-    bySource[e.source].total += e.quantity
-    bySource[e.source].codes.add(e.code)
-  })
-
-  const rows = Object.entries(bySource).filter(([, d]) => d.total > 0)
-  if (rows.length === 0) return null
-
-  return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex flex-col gap-3">
-      <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold">Por Fuente</p>
-      {rows.map(([src, d]) => {
-        const meta = SOURCE_META[src] || { label: src, icon: '📌' }
-        const dupes = d.total - d.codes.size
-        return (
-          <div key={src} className="flex items-center gap-3">
-            <span className="text-lg">{meta.icon}</span>
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-300">{meta.label}</span>
-                <span className="text-sm font-bold text-white">
-                  {d.codes.size} <span className="text-gray-500 font-normal">únicas</span>
-                  {dupes > 0 && <span className="text-amber-400 font-normal ml-2">{dupes} reps</span>}
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola, clearCollection, entries = [], packCounts = {}, onPackUpdate }) {
+export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeValue, completionPct, haveFoil, haveCocaCola, needCocaCola, clearCollection, packCount = 0, onPackUpdate }) {
   const totalDuplicates = duplicates.reduce((s, d) => s + d.extraQty, 0)
   const totalOwned = haveAlbum.length + haveCocaCola.length
   const [confirmReset, setConfirmReset] = useState(false)
@@ -157,13 +112,10 @@ export default function Dashboard({ haveAlbum, needList, duplicates, totalTradeV
 
       {/* Pack counter */}
       <PackCounter
-        packCounts={packCounts}
+        packCount={packCount}
         onPackUpdate={onPackUpdate}
         totalStickersOwned={totalOwned}
       />
-
-      {/* Source breakdown */}
-      <SourceBreakdown entries={entries} />
 
       {/* Coca-Cola status */}
       {needCocaCola.length > 0 && (

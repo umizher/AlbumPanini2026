@@ -26,7 +26,7 @@ export default function App() {
   const [recentlyAdded, setRecentlyAdded] = useState([])
   const [pendingFromNeed, setPendingFromNeed] = useState(null)
   const [toast, setToast] = useState(null)
-  const [packCounts, setPackCounts] = useState(() => loadPacks())
+  const [packCount, setPackCount] = useState(() => loadPacks())
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type })
@@ -38,7 +38,6 @@ export default function App() {
     state,
     addSticker,
     removeOne,
-    removeAll,
     clearCollection: clearCollectionBase,
     importCollection,
     haveAlbum,
@@ -53,24 +52,23 @@ export default function App() {
     needCocaCola,
   } = useCollection()
 
-  // Wrap clearCollection to also clear recentlyAdded
   const clearCollection = useCallback(() => {
     clearCollectionBase()
     setRecentlyAdded([])
     showToast('Collection cleared', 'info')
   }, [clearCollectionBase, showToast])
 
-  const handlePackUpdate = useCallback((source, delta) => {
-    setPackCounts((prev) => {
-      const next = { ...prev, [source]: Math.max(0, (prev[source] || 0) + delta) }
+  const handlePackUpdate = useCallback((delta) => {
+    setPackCount((prev) => {
+      const next = Math.max(0, prev + delta)
       savePacks(next)
       return next
     })
   }, [])
 
   const handleAdd = useCallback(
-    (code, parallelId, source = null) => {
-      addSticker(code, parallelId, source)
+    (code, parallelId) => {
+      addSticker(code, parallelId)
       const info = getStickerInfo(code)
       const parallel = getParallel(parallelId)
       setRecentlyAdded((prev) => [{ code, parallelId, parallel, info, addedAt: Date.now() }, ...prev.slice(0, 19)])
@@ -152,8 +150,7 @@ export default function App() {
             haveCocaCola={haveCocaCola}
             needCocaCola={needCocaCola}
             clearCollection={clearCollection}
-            entries={entries}
-            packCounts={packCounts}
+            packCount={packCount}
             onPackUpdate={handlePackUpdate}
           />
         )}
