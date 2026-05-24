@@ -4,6 +4,7 @@ import { getParallel } from '../data/parallels'
 import { makeKey } from '../hooks/useCollection'
 import TypeSelector from './TypeSelector'
 import PasteOrTradeModal from './PasteOrTradeModal'
+import SourcePicker from './SourcePicker'
 
 function ParallelPicker({ code, entries, onSelect, onCancel }) {
   return (
@@ -40,12 +41,15 @@ function ParallelPicker({ code, entries, onSelect, onCancel }) {
 }
 
 
-export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], state, externalPending = false, onToast }) {
+export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], state, externalPending = false, onToast, onPackUpdate }) {
   const [code, setCode] = useState('')
   const [batch, setBatch] = useState(null)
-  const [pendingIntent, setPendingIntent] = useState(null) // { code, parallelId, queue, total }
+  const [pendingIntent, setPendingIntent] = useState(null) // { code, parallelId, queue, total, source }
   const [pendingRemoveEntries, setPendingRemoveEntries] = useState(null)
   const [mode, setMode] = useState('add')
+  const [pendingSource, setPendingSource] = useState(false)
+  const [batchSource, setBatchSource] = useState(null)
+  const [lastSource, setLastSource] = useState(null)
   const inputRef = useRef(null)
 
   const advanceQueue = (queue, total) => {
@@ -83,7 +87,15 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
     const codes = raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
     if (codes.length === 0) return
     setBatch({ queue: codes, total: codes.length })
+    setPendingSource(true)
     setCode('')
+  }
+
+  const handleSourceSelect = (source, packCount) => {
+    if (packCount > 0) onPackUpdate?.(source, packCount)
+    setBatchSource(source)
+    setLastSource(source)
+    setPendingSource(false)
   }
 
   // After parallel is selected: check if code is already in collection
@@ -94,26 +106,26 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
 
     if (isAlreadyOwned) {
       // Already have one → this is a duplicate, add directly to trade pile
-      onAdd(currentCode, parallelId)
+      onAdd(currentCode, parallelId, batchSource)
       advanceQueue(remaining, batch.total)
     } else {
       // First time seeing this code → ask: paste or trade?
       setBatch(null)
-      setPendingIntent({ code: currentCode, parallelId, queue: remaining, total: batch.total })
+      setPendingIntent({ code: currentCode, parallelId, queue: remaining, total: batch.total, source: batchSource })
     }
   }
 
   const handlePaste = () => {
-    const { code: c, parallelId, queue, total } = pendingIntent
-    onAdd(c, parallelId) // qty 1 → album
+    const { code: c, parallelId, queue, total, source } = pendingIntent
+    onAdd(c, parallelId, source) // qty 1 → album
     setPendingIntent(null)
     advanceQueue(queue, total)
   }
 
   const handleTrade = () => {
-    const { code: c, parallelId, queue, total } = pendingIntent
-    onAdd(c, parallelId) // first copy (album)
-    onAdd(c, parallelId) // second copy → spare for trade
+    const { code: c, parallelId, queue, total, source } = pendingIntent
+    onAdd(c, parallelId, source) // first copy (album)
+    onAdd(c, parallelId, source) // second copy → spare for trade
     setPendingIntent(null)
     advanceQueue(queue, total)
   }
@@ -268,8 +280,18 @@ export default function StickerInput({ onAdd, onRemove, recentlyAdded = [], stat
         </div>
       )}
 
+      {/* Source picker — shown right after submit, before type selection */}
+      {batch && pendingSource && !externalPending && (
+        <SourcePicker
+          batchSize={batch.total}
+          defaultSource={lastSource}
+          onSelect={handleSourceSelect}
+          onCancel={() => { setBatch(null); setCode(''); setPendingSource(false); setTimeout(() => inputRef.current?.focus(), 100) }}
+        />
+      )}
+
       {/* Parallel type selector (batch flow) */}
-      {batch && !externalPending && (
+      {batch && !pendingSource && !externalPending && (
         <TypeSelector
           code={batch.queue[0]}
           progress={batch.total > 1 ? `${batch.total - batch.queue.length + 1} of ${batch.total}` : null}

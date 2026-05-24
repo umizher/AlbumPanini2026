@@ -10,6 +10,7 @@ import NeedList from './components/NeedList'
 import ExportPanel from './components/ExportPanel'
 import TypeSelector from './components/TypeSelector'
 import Toast from './components/Toast'
+import { loadPacks, savePacks } from './components/PackCounter'
 
 const TABS = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -25,6 +26,7 @@ export default function App() {
   const [recentlyAdded, setRecentlyAdded] = useState([])
   const [pendingFromNeed, setPendingFromNeed] = useState(null)
   const [toast, setToast] = useState(null)
+  const [packCounts, setPackCounts] = useState(() => loadPacks())
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type })
@@ -58,9 +60,17 @@ export default function App() {
     showToast('Collection cleared', 'info')
   }, [clearCollectionBase, showToast])
 
+  const handlePackUpdate = useCallback((source, delta) => {
+    setPackCounts((prev) => {
+      const next = { ...prev, [source]: Math.max(0, (prev[source] || 0) + delta) }
+      savePacks(next)
+      return next
+    })
+  }, [])
+
   const handleAdd = useCallback(
-    (code, parallelId) => {
-      addSticker(code, parallelId)
+    (code, parallelId, source = null) => {
+      addSticker(code, parallelId, source)
       const info = getStickerInfo(code)
       const parallel = getParallel(parallelId)
       setRecentlyAdded((prev) => [{ code, parallelId, parallel, info, addedAt: Date.now() }, ...prev.slice(0, 19)])
@@ -142,6 +152,9 @@ export default function App() {
             haveCocaCola={haveCocaCola}
             needCocaCola={needCocaCola}
             clearCollection={clearCollection}
+            entries={entries}
+            packCounts={packCounts}
+            onPackUpdate={handlePackUpdate}
           />
         )}
         {activeTab === 'add' && (
@@ -152,6 +165,7 @@ export default function App() {
             state={state}
             externalPending={!!pendingFromNeed}
             onToast={showToast}
+            onPackUpdate={handlePackUpdate}
           />
         )}
         {activeTab === 'album' && (
@@ -167,7 +181,7 @@ export default function App() {
             duplicates={duplicates}
             totalTradeValue={totalTradeValue}
             removeOne={handleRemove}
-            addSticker={addSticker}
+            addSticker={handleAdd}
             onToast={showToast}
           />
         )}

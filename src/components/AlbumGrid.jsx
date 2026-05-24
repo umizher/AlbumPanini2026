@@ -3,6 +3,7 @@ import { TEAMS, ALBUM_STICKERS, CONFEDERATION_ORDER, COCA_COLA_STICKERS } from '
 import { getParallel } from '../data/parallels'
 import TypeSelector from './TypeSelector'
 import PasteOrTradeModal from './PasteOrTradeModal'
+import SourcePicker from './SourcePicker'
 
 const FILTERS = ['All', 'Have', 'Need', 'Duplicate']
 
@@ -169,6 +170,10 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
   const [activeSticker, setActiveSticker] = useState(null)
   const [pendingTypeSelect, setPendingTypeSelect] = useState(null)
   const [pendingIntent, setPendingIntent] = useState(null)
+  const [pendingSource, setPendingSource] = useState(false)
+  const [pendingSourceCode, setPendingSourceCode] = useState(null)
+  const [lastSource, setLastSource] = useState(null)
+  const [gridSource, setGridSource] = useState(null)
 
   const confs = ['All', ...CONFEDERATION_ORDER]
 
@@ -203,7 +208,16 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
   const handleAddSticker = () => {
     const code = activeSticker.code
     setActiveSticker(null)
-    setPendingTypeSelect(code)
+    setPendingSourceCode(code)
+    setPendingSource(true)
+  }
+
+  const handleGridSourceSelect = (source) => {
+    setLastSource(source)
+    setPendingSource(false)
+    setPendingTypeSelect(pendingSourceCode)
+    setPendingSourceCode(null)
+    setGridSource(source)
   }
 
   const handleTypeSelect = (parallelId) => {
@@ -211,20 +225,20 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
     const isAlreadyOwned = Object.values(state.stickers).some((e) => e.code === code)
     setPendingTypeSelect(null)
     if (isAlreadyOwned) {
-      onAdd(code, parallelId)
+      onAdd(code, parallelId, gridSource)
     } else {
-      setPendingIntent({ code, parallelId })
+      setPendingIntent({ code, parallelId, source: gridSource })
     }
   }
 
   const handlePaste = () => {
-    onAdd(pendingIntent.code, pendingIntent.parallelId)
+    onAdd(pendingIntent.code, pendingIntent.parallelId, pendingIntent.source)
     setPendingIntent(null)
   }
 
   const handleTrade = () => {
-    onAdd(pendingIntent.code, pendingIntent.parallelId)
-    onAdd(pendingIntent.code, pendingIntent.parallelId)
+    onAdd(pendingIntent.code, pendingIntent.parallelId, pendingIntent.source)
+    onAdd(pendingIntent.code, pendingIntent.parallelId, pendingIntent.source)
     setPendingIntent(null)
   }
 
@@ -353,6 +367,15 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
           onAddSticker={handleAddSticker}
           onRemove={onRemove}
           onClose={() => setActiveSticker(null)}
+        />
+      )}
+
+      {/* Source picker — shown before type selection when adding from grid */}
+      {pendingSource && (
+        <SourcePicker
+          defaultSource={lastSource}
+          onSelect={(source) => handleGridSourceSelect(source)}
+          onCancel={() => { setPendingSource(false); setPendingSourceCode(null) }}
         />
       )}
 

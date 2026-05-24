@@ -27,7 +27,7 @@ export default function RecordTrade({ duplicates, onRemoveOne, onAdd, onClose, o
   }
 
   const handleReceiveSelect = (parallelId) => {
-    onAdd(receivingBatch.queue[0], parallelId)
+    onAdd(receivingBatch.queue[0], parallelId, 'trade')
     const remaining = receivingBatch.queue.slice(1)
     if (remaining.length > 0) {
       setReceivingBatch({ queue: remaining, total: receivingBatch.total })
