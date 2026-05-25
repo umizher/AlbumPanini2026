@@ -17,9 +17,11 @@ function StickerDot({ sticker, owned, parallel, onClick }) {
       ? 'bg-amber-500 border-amber-400'
       : 'bg-gray-800 border-gray-700'
 
-  const label = sticker.position != null
-    ? sticker.position
-    : sticker.code.replace(/[A-Z]/g, '') || sticker.code
+  const label = sticker.code
+  const textSize =
+    label.length <= 2 ? 'text-[14px] sm:text-[16px]' :
+    label.length <= 4 ? 'text-[8px] sm:text-[9px]' :
+                        'text-[6px] sm:text-[7px]'
 
   return (
     <button
@@ -27,7 +29,7 @@ function StickerDot({ sticker, owned, parallel, onClick }) {
       title={`${sticker.code} — ${sticker.title}${parallel ? ` (${parallel.name})` : ''}${sticker.isFoil ? ' ✨ FOIL' : ''}${sticker.isCocaCola ? ' 🥤 Coca-Cola' : ''}`}
       className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md border flex items-center justify-center transition-all active:scale-90 cursor-pointer ${base} ${sticker.isFoil ? 'ring-2 ring-yellow-400/60' : sticker.isCocaCola ? 'ring-2 ring-red-400/60' : ''}`}
     >
-      <span className={`${owned === 'have' || owned === 'dup' ? 'text-white' : sticker.isCocaCola ? 'text-red-700' : 'text-gray-600'} text-[16px] sm:text-[18px] leading-none font-mono font-bold`}>
+      <span className={`${owned === 'have' || owned === 'dup' ? 'text-white' : sticker.isCocaCola ? 'text-red-700' : 'text-gray-600'} ${textSize} leading-none font-mono font-bold`}>
         {label}
       </span>
     </button>
@@ -134,7 +136,10 @@ function TeamSection({ team, stickers, ownedCodes, stateStickers, onStickerClick
       <div className="flex items-center gap-3 mb-3">
         <span className="text-2xl">{team.flag}</span>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-white text-base truncate">{team.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-white text-base truncate">{team.name}</p>
+            <span className="text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full font-mono shrink-0">{team.code}</span>
+          </div>
           <div className="flex items-center gap-2 mt-0.5">
             <div className="flex-1 bg-gray-800 rounded-full h-1.5">
               <div className="bg-emerald-500 h-1.5 rounded-full transition-all" style={{ width: `${pct}%` }} />
