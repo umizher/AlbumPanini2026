@@ -6,7 +6,7 @@ const STORAGE_KEY = 'panini-wc2026-v1'
 
 export const makeKey = (code, parallelId) => `${code}::${parallelId}`
 
-// MUS1–MUS11 were renamed to FWC10–FWC20 — migrate saved data automatically
+// MUS1–MUS11 were renamed to FWC10–FWC19 — migrate saved data automatically
 const REMOVED_PARALLEL_IDS = new Set(['bronze_extra', 'silver_extra', 'gold_extra', 'crumpled', 'gold_crumple'])
 const migrateRemovedParallels = (state) => {
   const hasRemoved = Object.values(state.stickers).some((e) => REMOVED_PARALLEL_IDS.has(e.parallelId))
@@ -24,7 +24,7 @@ const migrateMUStoFWC = (state) => {
   const hasLegacy = Object.values(state.stickers).some((e) => /^MUS\d+$/.test(e.code))
   if (!hasLegacy) return state
   const remap = {}
-  for (let i = 1; i <= 11; i++) remap[`MUS${i}`] = `FWC${i + 9}`
+  for (let i = 1; i <= 10; i++) remap[`MUS${i}`] = `FWC${i + 9}`
   const migrated = {}
   Object.values(state.stickers).forEach((entry) => {
     const newCode = remap[entry.code] || entry.code
