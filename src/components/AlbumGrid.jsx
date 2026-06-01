@@ -45,13 +45,13 @@ function StickerDot({ sticker, quantity, onTap, onLongPress }) {
 
   const label = sticker.code
   const textSize =
-    label.length <= 2 ? 'text-[18px] sm:text-[20px]' :
-    label.length <= 4 ? 'text-[11px] sm:text-[13px]' :
-                        'text-[9px] sm:text-[11px]'
+    label.length <= 2 ? 'text-[24px] sm:text-[28px]' :
+    label.length <= 4 ? 'text-[15px] sm:text-[17px]' :
+                        'text-[12px] sm:text-[14px]'
 
   const textColor = owned
     ? 'text-white'
-    : sticker.isCocaCola ? 'text-red-700' : 'text-gray-600'
+    : sticker.isCocaCola ? 'text-red-300' : 'text-gray-200'
 
   return (
     <button
