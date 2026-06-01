@@ -51,7 +51,7 @@ function StickerDot({ sticker, quantity, onTap, onLongPress }) {
 
   const textColor = owned
     ? 'text-white'
-    : sticker.isCocaCola ? 'text-red-300' : 'text-gray-200'
+    : sticker.isCocaCola ? 'text-red-200' : 'text-white'
 
   return (
     <button
