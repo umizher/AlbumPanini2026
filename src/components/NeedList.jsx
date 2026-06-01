@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { exportNeedList, copyToClipboard, formatNeedListText } from '../utils/export'
 import { TEAMS } from '../data/album'
 
-export default function NeedList({ needList, totalTradeValue, onAdd }) {
+export default function NeedList({ needList, totalTradeValue }) {
   const [copied, setCopied] = useState(false)
   const [groupBy, setGroupBy] = useState('team')
   const [search, setSearch] = useState('')
@@ -139,11 +139,6 @@ export default function NeedList({ needList, totalTradeValue, onAdd }) {
                   <span className={`text-base font-mono font-bold ${s.isSpecial ? 'text-yellow-400' : 'text-gray-400'}`}>{s.code}</span>
                   <span className="text-base text-gray-300 flex-1">{s.title}</span>
                   {s.isSpecial && <span className="text-sm text-yellow-500">★ special</span>}
-                  <button
-                    onClick={() => onAdd(s.code)}
-                    className="text-emerald-500 hover:text-emerald-400 text-lg font-bold leading-none"
-                    title="Mark as found"
-                  >+</button>
                 </div>
               ))}
             </div>

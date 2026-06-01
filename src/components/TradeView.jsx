@@ -41,7 +41,7 @@ function TradeCard({ item, onRemoveOne }) {
   )
 }
 
-export default function TradeView({ duplicates, totalTradeValue, removeOne, addSticker, onToast }) {
+export default function TradeView({ duplicates, totalTradeValue, removeOne, onToast }) {
   const [copied, setCopied] = useState(false)
   const [showRecordTrade, setShowRecordTrade] = useState(false)
 
@@ -138,7 +138,6 @@ export default function TradeView({ duplicates, totalTradeValue, removeOne, addS
         <RecordTrade
           duplicates={duplicates}
           onRemoveOne={removeOne}
-          onAdd={addSticker}
           onClose={() => setShowRecordTrade(false)}
           onToast={onToast}
         />

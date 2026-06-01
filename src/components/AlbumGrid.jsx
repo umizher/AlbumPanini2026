@@ -45,9 +45,9 @@ function StickerDot({ sticker, quantity, onTap, onLongPress }) {
 
   const label = sticker.code
   const textSize =
-    label.length <= 2 ? 'text-[14px] sm:text-[16px]' :
-    label.length <= 4 ? 'text-[8px] sm:text-[9px]' :
-                        'text-[6px] sm:text-[7px]'
+    label.length <= 2 ? 'text-[18px] sm:text-[20px]' :
+    label.length <= 4 ? 'text-[11px] sm:text-[13px]' :
+                        'text-[9px] sm:text-[11px]'
 
   const textColor = owned
     ? 'text-white'
@@ -62,7 +62,7 @@ function StickerDot({ sticker, quantity, onTap, onLongPress }) {
       onClick={handleClick}
       title={`${sticker.code} — ${sticker.title}${sticker.isFoil ? ' ✨ FOIL' : ''}${sticker.isCocaCola ? ' 🥤 Coca-Cola' : ''}${owned ? ` · Quantity: ${quantity}` : ''}`}
       style={{ touchAction: 'manipulation' }}
-      className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-md border flex items-center justify-center transition-all duration-150 cursor-pointer select-none
+      className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg border flex items-center justify-center transition-all duration-150 cursor-pointer select-none
         ${base}
         ${sticker.isFoil ? 'ring-2 ring-yellow-400/60' : sticker.isCocaCola ? 'ring-2 ring-red-400/60' : ''}
         ${isPressing && owned ? 'scale-90 ring-2 ring-red-500/70' : 'active:scale-90'}
@@ -73,7 +73,7 @@ function StickerDot({ sticker, quantity, onTap, onLongPress }) {
         {label}
       </span>
       {hasDups && (
-        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-orange-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none px-0.5 shadow-lg shadow-orange-900/50">
+        <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-orange-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center leading-none px-0.5 shadow-lg shadow-orange-900/50">
           {quantity - 1}
         </span>
       )}
@@ -121,7 +121,7 @@ function TeamSection({ team, stickers, stateStickers, onTap, onLongPress }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {stickers.map((s) => {
           const qty = getQuantity(s.code)
           return (
@@ -231,7 +231,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
               {introHave}/{introStickers.length}
             </span>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {introStickers.map((s) => {
               const qty = getQuantity(s.code)
               return (
@@ -246,7 +246,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
             })}
           </div>
           <p className="text-[10px] text-gray-600 mt-2 flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-sm ring-2 ring-yellow-400/60 bg-gray-800" />
+            <span className="inline-block w-3 h-3 rounded ring-2 ring-yellow-400/60 bg-gray-800" />
             = FOIL sticker
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function AlbumGrid({ ownedCodes, state, onAdd, onRemove }) {
             <span className="text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full ml-1">CC1–CC12</span>
           </div>
           <p className="text-sm text-red-400/70 mb-3">Solo en botellas Coca-Cola 20oz · No en sobres estándar</p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {COCA_COLA_STICKERS.map((s) => {
               const qty = getQuantity(s.code)
               return (

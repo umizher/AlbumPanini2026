@@ -3,18 +3,15 @@ import { useCollection } from './hooks/useCollection'
 import { getStickerInfo, TOTAL_STICKERS } from './data/album'
 import { getParallel } from './data/parallels'
 import Dashboard from './components/Dashboard'
-import StickerInput from './components/StickerInput'
 import AlbumGrid from './components/AlbumGrid'
 import TradeView from './components/TradeView'
 import NeedList from './components/NeedList'
 import ExportPanel from './components/ExportPanel'
-import TypeSelector from './components/TypeSelector'
 import Toast from './components/Toast'
 import { loadPacks, savePacks } from './components/PackCounter'
 
 const TABS = [
   { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'add', label: 'Add', icon: '➕' },
   { id: 'album', label: 'Album', icon: '📖' },
   { id: 'trade', label: 'Trade', icon: '🔄' },
   { id: 'need', label: 'Need', icon: '📋' },
@@ -23,8 +20,6 @@ const TABS = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home')
-  const [recentlyAdded, setRecentlyAdded] = useState([])
-  const [pendingFromNeed, setPendingFromNeed] = useState(null)
   const [toast, setToast] = useState(null)
   const [packCount, setPackCount] = useState(() => loadPacks())
 
@@ -54,7 +49,6 @@ export default function App() {
 
   const clearCollection = useCallback(() => {
     clearCollectionBase()
-    setRecentlyAdded([])
     showToast('Collection cleared', 'info')
   }, [clearCollectionBase, showToast])
 
@@ -71,13 +65,12 @@ export default function App() {
       addSticker(code, parallelId)
       const info = getStickerInfo(code)
       const parallel = getParallel(parallelId)
-      setRecentlyAdded((prev) => [{ code, parallelId, parallel, info, addedAt: Date.now() }, ...prev.slice(0, 19)])
       if (parallel.multiplier >= 20) {
         showToast(`💎 ${code} — Ultra Rare ${parallel.name}! Check eBay price`, 'success')
       } else if (parallel.multiplier >= 8) {
         showToast(`🔥 ${code} added — High Value ${parallel.name}! Worth ${parallel.multiplier}× base`, 'success')
       } else {
-        showToast(`${code} added (${parallel.name})`)
+        showToast(`${code} added`)
       }
     },
     [addSticker, showToast]
@@ -98,21 +91,6 @@ export default function App() {
     [removeOne, addSticker]
   )
 
-  const handleAddFromNeed = useCallback((code) => {
-    setPendingFromNeed(code)
-    setActiveTab('add')
-  }, [])
-
-  const handleNeedTypeSelect = useCallback(
-    (parallelId) => {
-      if (pendingFromNeed) {
-        handleAdd(pendingFromNeed, parallelId)
-        setPendingFromNeed(null)
-      }
-    },
-    [pendingFromNeed, handleAdd]
-  )
-
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
       {/* Toast */}
@@ -120,20 +98,12 @@ export default function App() {
 
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-950/90 backdrop-blur border-b border-gray-800 px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚽</span>
-            <div>
-              <h1 className="text-base font-black text-white leading-tight">Panini WC 2026</h1>
-              <p className="text-xs text-emerald-500">{completionPct.toFixed(1)}% · {haveAlbum.length}/{TOTAL_STICKERS}</p>
-            </div>
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <span className="text-2xl">⚽</span>
+          <div>
+            <h1 className="text-base font-black text-white leading-tight">Panini WC 2026</h1>
+            <p className="text-xs text-emerald-500">{completionPct.toFixed(1)}% · {haveAlbum.length}/{TOTAL_STICKERS}</p>
           </div>
-          <button
-            onClick={() => { setPendingFromNeed(null); setActiveTab('add') }}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors active:scale-95"
-          >
-            + Add
-          </button>
         </div>
       </header>
 
@@ -154,17 +124,6 @@ export default function App() {
             onPackUpdate={handlePackUpdate}
           />
         )}
-        {activeTab === 'add' && (
-          <StickerInput
-            onAdd={handleAdd}
-            onRemove={handleRemove}
-            recentlyAdded={recentlyAdded}
-            state={state}
-            externalPending={!!pendingFromNeed}
-            onToast={showToast}
-            onPackUpdate={handlePackUpdate}
-          />
-        )}
         {activeTab === 'album' && (
           <AlbumGrid
             ownedCodes={ownedCodes}
@@ -178,12 +137,11 @@ export default function App() {
             duplicates={duplicates}
             totalTradeValue={totalTradeValue}
             removeOne={handleRemove}
-            addSticker={handleAdd}
             onToast={showToast}
           />
         )}
         {activeTab === 'need' && (
-          <NeedList needList={needList} totalTradeValue={totalTradeValue} onAdd={handleAddFromNeed} />
+          <NeedList needList={needList} totalTradeValue={totalTradeValue} />
         )}
         {activeTab === 'export' && (
           <ExportPanel
@@ -215,15 +173,6 @@ export default function App() {
           ))}
         </div>
       </nav>
-
-      {/* Pending type selector from Need list */}
-      {pendingFromNeed && (
-        <TypeSelector
-          code={pendingFromNeed}
-          onSelect={handleNeedTypeSelect}
-          onCancel={() => setPendingFromNeed(null)}
-        />
-      )}
     </div>
   )
 }
